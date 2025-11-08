@@ -27,7 +27,7 @@
 
 html,body,#app{height:100%}
 body{
-    font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+    font-family:Inter, system-ui, -apple-leading, 'Segoe UI', Roboto, Arial;
     background:var(--bg-secondary);
     color:var(--text-primary);
     padding:18px;
@@ -57,7 +57,7 @@ body{
 .punching{animation:punchGlove 0.5s ease-out;}
 .scorePop{position:absolute;font-weight:900;font-size:22px;opacity:1;transform:translateY(0);animation:popUp 900ms forwards}
 @keyframes popUp{0%{opacity:1;transform:translateY(0) scale(1)}80%{opacity:0.9;transform:translateY(-32px) scale(1.08)}100%{opacity:0;transform:translateY(-64px) scale(1.1)}}
-.shopItem{background:linear-gradient(180deg,#0b1530,#07102a);border-radius:12px;padding:10px;cursor:pointer}
+.shopItem{background:linear-gradient(180deg,#0b1220,#07102a);border-radius:12px;padding:10px;cursor:pointer}
 @media (max-width:640px){.letter,.slot{width:52px;height:52px;font-size:22px}.puzzle-image{font-size:64px}.glove{font-size:48px;right:0px}}
 
 /* --- FIXED: Level Select Contrast --- */
@@ -95,6 +95,28 @@ body{
 }
 #xpContainer.xp-flash {
     animation: xpFlash 0.3s ease-in-out;
+}
+
+/* Modal Styling */
+.modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-content {
+    background-color: white;
+    color: #333;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    position: relative;
+    /* *** FIXED: Ensure shop content can scroll *** */
+    max-height: 85vh; 
+    overflow-y: auto;
 }
 </style>
 </head>
@@ -165,9 +187,9 @@ body{
   
   <!-- Shop Modal -->
   <div id="shopModal" class="fixed inset-0 bg-black/75 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-xl w-11/12 max-w-lg text-black">
+    <div class="modal-content w-11/12 max-w-lg">
       <h2 class="text-3xl font-bold mb-4">The Glove Shop</h2>
-      <div id="shopContent"></div>
+      <div id="shopContent" class="overflow-y-auto"></div>
       <button id="closeShop" class="mt-4 px-4 py-2 bg-gray-400 hover:bg-gray-500 rounded font-semibold">Close</button>
     </div>
   </div>
@@ -278,6 +300,13 @@ let levelChoice = parseInt(store.levelChoice||1); // *** FIXED: Load levelChoice
 let currentWordData = null; // Stores {word: 'X', emoji: 'Y'}
 let currentWord=null, userAnswer=[];
 let isAnimating = false; // Prevent double-clicks during animation
+
+// --- Sound Effects (Local only implementation) ---
+const correctSound = new Audio('https://freesound.org/data/previews/270/270156_2713636-lq.mp3'); 
+const wrongSound = new Audio('https://freesound.org/data/previews/270/270157_2713636-lq.mp3'); 
+const punchSound = new Audio('https://freesound.org/data/previews/120/120374_1844266-lq.mp3');
+const levelUpSound = new Audio('https://freesound.org/data/previews/269/269026_2713636-lq.mp3');
+
 
 // --- DOM CACHE ---
 const el={
