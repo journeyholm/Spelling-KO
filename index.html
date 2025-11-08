@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Spelling K.O. — The Spelling Gauntlet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<style>
+/* --- THEME COLORS --- */
+:root {
+    /* Day Mode (Light - Default) */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f0f0f0;
+    --text-primary: #333333;
+    --card-bg: #e0e0e0;
+    --accent: #ffb400;
+}
+[data-theme="dark"] {
+    /* Night Mode (Dark) */
+    --bg-primary: #0b1220;
+    --bg-secondary: #071022;
+    --text-primary: #ffffff;
+    --card-bg: linear-gradient(180deg,#0f1724,#071022);
+    --accent: #ffb400;
+}
+
+html,body,#app{height:100%}
+body{
+    font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+    background:var(--bg-secondary);
+    color:var(--text-primary);
+    padding:18px;
+    transition: background-color 0.3s, color 0.3s;
+}
+.card{
+    background:var(--card-bg);
+    border:1px solid rgba(255,255,255,0.04);
+    transition: background 0.3s;
+}
+.letter{
+    width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;cursor:pointer;user-select:none;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+}
+.slot{width:64px;height:64px;border-radius:12px;border:2px dashed rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center}
+.big-btn{padding:12px 18px;border-radius:12px}
+/* Renamed .balloon to .puzzle-image */
+.puzzle-image{font-size:84px;display:inline-block;transform-origin:center bottom;}
+/* --- GLOVE POSITION: Moved left and adjusted perspective size --- */
+.glove{position:absolute; right:20%; bottom:60px; font-size:64px; transform-origin:right center; z-index:2;}
+.sparkle{position:absolute;font-size:32px;opacity:0;pointer-events:none; animation:fadeUp 0.8s forwards;}
+@keyframes fadeUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(1.3)}}
+@keyframes punchGlove{0%{transform:translateX(0) rotate(0deg);}50%{transform:translateX(-120px) rotate(-15deg);}80%{transform:translateX(-100px) rotate(5deg);}100%{transform:translateX(0) rotate(0deg);}}
+@keyframes wobbleBalloon{0%{transform:rotate(0deg);}25%{transform:rotate(15deg);}50%{transform:rotate(-10deg);}75%{transform:rotate(5deg);}100%{transform:rotate(0deg);}}
+.balloonHit{animation:wobbleBalloon 0.5s ease-out;}
+.punching{animation:punchGlove 0.5s ease-out;}
+.scorePop{position:absolute;font-weight:900;font-size:22px;opacity:1;transform:translateY(0);animation:popUp 900ms forwards}
+@keyframes popUp{0%{opacity:1;transform:translateY(0) scale(1)}80%{opacity:0.9;transform:translateY(-32px) scale(1.08)}100%{opacity:0;transform:translateY(-64px) scale(1.1)}}
+.shopItem{background:linear-gradient(180deg,#0b1530,#07102a);border-radius:12px;padding:10px;cursor:pointer}
+@media (max-width:640px){.letter,.slot{width:52px;height:52px;font-size:22px}.puzzle-image{font-size:64px}.glove{font-size:48px;right:0px}}
+
+/* --- FIXED: Level Select Contrast --- */
+#levelSelect {
+    background-color: #333 !important;
+    color: #ffb400 !important;
+    border: 2px solid #ffb400;
+    font-weight: bold;
+}
+/* --- NEW: Level Display Style --- */
+#levelDisplay {
+    display: inline-block;
+    background: #0088ff;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-right: 12px;
+}
+/* --- NEW VISUAL PERKS --- */
+#coins.gold-boost {
+    color: gold;
+    text-shadow: 0 0 5px orange;
+}
+.streak-guard { /* LVL 4 Perk */
+    color: #ffd700;
+    font-weight: 800;
+    text-shadow: 0 0 3px #ffa500;
+}
+@keyframes xpFlash { /* LVL 3 Perk */
+    0% { background-color: #10b981; }
+    50% { background-color: #00ffaa; }
+    100% { background-color: #10b981; }
+}
+#xpContainer.xp-flash {
+    animation: xpFlash 0.3s ease-in-out;
+}
+</style>
+</head>
+<body data-theme="dark">
+<div id="app" class="max-w-4xl mx-auto">
+  <div class="card p-4 rounded-xl shadow-xl">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-14 h-14 bg-white/6 rounded-full flex items-center justify-center text-3xl">🥊</div>
+        <div>
+          <div class="text-sm text-gray-300">Spelling K.O. — The Spelling Gauntlet</div>
+          <div id="mode-label" class="text-xl font-semibold mt-0">Spelling K.O.</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 cursor-pointer" id="statsHeader">
+        <!-- *** NEW: LEVEL DISPLAY *** -->
+        <div id="levelDisplay">LVL 1</div> 
+        <div class="text-sm text-gray-300 text-right">Coins: <span id="coins">0</span></div>
+        <div class="text-xl font-bold" id="score">Score: 0</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+      <div class="md:col-span-1 flex flex-col items-center gap-3">
+        <div class="relative w-48 h-48 flex items-center justify-center">
+          <!-- Renamed balloon to puzzle-image -->
+          <div id="puzzleImage" class="puzzle-image absolute bottom-0 z-1">❓</div>
+          <div id="glove" class="glove">🥊</div>
+          <div id="scorePopWrap" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+        <!-- Updated text -->
+        <div class="text-center text-sm text-gray-300">Click the image to hear the word. Correct = punch!</div>
+        <button id="emojiBtn" class="text-6xl big-btn bg-white/6 rounded-xl">🔊</button>
+      </div>
+
+      <div class="md:col-span-2">
+        <div class="mb-3 flex items-center justify-between">
+          <!-- REMOVED: "Big buttons for little hands." text -->
+          <div class="text-sm text-gray-300">Tap letters to build the word. Press Enter to submit.</div>
+          <div class="flex gap-2">
+            <select id="levelSelect" class="rounded px-2 py-1">
+              <option value="1">Level 1</option>
+              <option value="2">Level 2</option>
+              <option value="3">Level 3</option>
+              <option value="4">Level 4</option>
+              <option value="5">Mixed</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="slots" class="flex gap-2 flex-wrap mb-4"></div>
+        <div id="tiles" class="flex gap-2 flex-wrap card p-3 rounded-lg"></div>
+
+        <div class="mt-4 flex gap-2">
+          <button id="submit" class="px-5 py-3 rounded bg-amber-400 text-black font-bold">Submit</button>
+          <button id="new" class="px-4 py-3 rounded bg-white/6">New Word</button>
+          <button id="themeToggle" class="px-4 py-3 rounded bg-white/10 text-gray-400">🌙/☀️</button>
+          <button id="shopBtn" class="px-4 py-3 rounded bg-yellow-500 text-black font-bold">💰 Shop</button>
+          <div id="feedback" class="ml-2 text-lg font-semibold"></div>
+        </div>
+
+        <div class="mt-3 text-sm text-gray-400" id="xpContainer">
+          Streak: <span id="streak">0</span> • XP: <span id="xp">0</span>/<span id="xpNext">50</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Shop Modal -->
+  <div id="shopModal" class="fixed inset-0 bg-black/75 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-6 rounded-xl w-11/12 max-w-lg text-black">
+      <h2 class="text-3xl font-bold mb-4">The Glove Shop</h2>
+      <div id="shopContent"></div>
+      <button id="closeShop" class="mt-4 px-4 py-2 bg-gray-400 hover:bg-gray-500 rounded font-semibold">Close</button>
+    </div>
+  </div>
+
+  <!-- *** NEW: PROGRESS MODAL *** -->
+  <div id="progressModal" class="modal">
+    <div class="modal-content w-11/12 max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold">Player Stats & Progress</h2>
+            <button id="closeProgressModal" class="text-xl font-bold p-1">&times;</button>
+        </div>
+        <div id="progressContent" class="text-left space-y-2">
+            <!-- Stats inserted here by renderProgressModal -->
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- UTILITY FUNCTIONS ---
+function shuffle(a){ return a.slice().sort(()=>0.5-Math.random()); }
+function playSpeech(text){ try{ const u=new SpeechSynthesisUtterance(text); u.rate=0.9; speechSynthesis.speak(u); } catch(e){console.warn(e);} }
+
+// --- DATA DEFINITIONS (CONSTANTS) ---
+const WORD_SETS = {
+  1: [ 
+    {word:'CAT', emoji:'🐱'}, {word:'DOG', emoji:'🐶'}, {word:'SUN', emoji:'☀️'}, {word:'BED', emoji:'🛏️'}, {word:'HAT', emoji:'🎩'},
+    {word:'MUG', emoji:'☕'}, {word:'FOG', emoji:'🌫️'}, {word:'RUG', emoji:'🛋️'}, {word:'BUS', emoji:'🚌'}, {word:'PIG', emoji:'🐷'},
+    {word:'MAP', emoji:'🗺️'}, {word:'FOX', emoji:'🦊'}, {word:'KEY', emoji:'🔑'}, {word:'JAM', emoji:'🍓'}, {word:'PEN', emoji:'🖊️'},
+    {word:'TEN', emoji:'🔟'}, {word:'NET', emoji:'🥅'}, {word:'WET', emoji:'💧'}, {word:'MOP', emoji:'🧹'}, {word:'TOP', emoji:'🔝'},
+    {word:'VAN', emoji:'🚐'}, {word:'WEB', emoji:'🕷️'}, {word:'SUB', emoji:'🚇'}, {word:'CUP', emoji:'🥛'}, {word:'LOG', emoji:'🪵'},
+    {word:'BOX', emoji:'📦'}, {word:'HEN', emoji:'🐔'}, {word:'FIN', emoji:'🦈'}, {word:'LIP', emoji:'👄'}, {word:'ZIP', emoji:'🤐'},
+    {word:'JOG', emoji:'🏃'}, {word:'BAG', emoji:'🛍️'}, {word:'TAG', emoji:'🏷️'}, {word:'CAB', emoji:'🚕'}, {word:'MAD', emoji:'😡'},
+    {word:'DAD', emoji:'👨‍👧‍👦'}, {word:'SAD', emoji:'😞'}, {word:'PAD', emoji:'📝'}, {word:'GUM', emoji:'🍬'}, {word:'TUB', emoji:'🛁'},
+    {word:'NUT', emoji:'🌰'}, {word:'CUT', emoji:'✂️'}, {word:'SIT', emoji:'🪑'}, {word:'HIT', emoji:'💥'}, {word:'FIT', emoji:'💪'},
+    {word:'SIX', emoji:'6️⃣'}, {word:'MIX', emoji:'🔀'}, {word:'WIG', emoji:'👩‍🦱'}, {word:'FIG', emoji:'🥝'}, {word:'JET', emoji:'✈️'}
+  ],
+  2: [ 
+    {word:'CAKE', emoji:'🎂'}, {word:'FISH', emoji:'🐟'}, {word:'BIKE', emoji:'🚲'}, {word:'NOTE', emoji:'📝'}, {word:'TREE', emoji:'🌳'},
+    {word:'WAVE', emoji:'🌊'}, {word:'GAME', emoji:'🎮'}, {word:'HOME', emoji:'🏠'}, {word:'CUBE', emoji:'🧊'}, {word:'ROSE', emoji:'🌹'},
+    {word:'FIRE', emoji:'🔥'}, {word:'SHOE', emoji:'👟'}, {word:'FROG', emoji:'🐸'}, {word:'FLAG', emoji:'🚩'}, {word:'DRUM', emoji:'🥁'},
+    {word:'SLIP', emoji:'🛼'}, {word:'PLUG', emoji:'🔌'}, {word:'TWIN', emoji:'👯‍♀️'}, {word:'STEP', emoji:'👣'}, {word:'GRIN', emoji:'😁'},
+    {word:'GLOW', emoji:'✨'}, {word:'STAR', emoji:'⭐'}, {word:'SHIP', emoji:'🚢'}, {word:'SWAN', emoji:'🦢'}, {word:'TRAP', emoji:'𪤤'},
+    {word:'BRAG', emoji:'🗣️'}, {word:'CLIP', emoji:'📎'}, {word:'DROP', emoji:'💧'}, {word:'SPOT', emoji:'⚫'}, {word:'TUBE', emoji:'🧴'},
+    {word:'RIDE', emoji:'🎢'}, {word:'DIME', emoji:'🪙'}, {word:'LAKE', emoji:'🏞️'}, {word:'RULE', emoji:'📏'}, {word:'VOTE', emoji:'🗳️'},
+    {word:'DUCK', emoji:'🦆'}, {word:'MILK', emoji:'🥛'}, {word:'HAND', emoji:'✋'}, {word:'TENT', emoji:'⛺'}, {word:'JUMP', emoji:'🤸'},
+    {word:'KITE', emoji:'🪁'}, {word:'BUMP', emoji:'💥'}, {word:'MASK', emoji:'🎭'}, {word:'POND', emoji:'🏞️'}, {word:'YARN', emoji:'🧶'},
+    {word:'WOLF', emoji:'🐺'}, {word:'PINK', emoji:'🌸'}, {word:'BELT', emoji:'🥋'}, {word:'GIFT', emoji:'🎁'}, {word:'NEST', emoji:'🪺'}
+  ],
+  3: [ 
+    {word:'APPLE', emoji:'🍎'}, {word:'PLANT', emoji:'🪴'}, {word:'GLOBE', emoji:'🌍'}, {word:'HOUSE', emoji:'🏠'}, {word:'SNAKE', emoji:'🐍'},
+    {word:'WATER', emoji:'💧'}, {word:'TIGER', emoji:'🐯'}, {word:'FANCY', emoji:'💎'}, {word:'SHARK', emoji:'🦈'}, {word:'HEART', emoji:'❤️'},
+    {word:'PIRATE', emoji:'🏴‍☠️'}, {word:'DRAGON', emoji:'🐉'}, {word:'CHEST', emoji:'📦'}, {word:'CLOUD', emoji:'☁️'}, {word:'TRAIN', emoji:'🚂'},
+    {word:'PANDA', emoji:'🐼'}, {word:'FROSTY', emoji:'❄️'}, {word:'CROWD', emoji:'🧍'}, {word:'SCREAM', emoji:'😱'}, {word:'TRICKY', emoji:'🃏'},
+    {word:'QUEEN', emoji:'👑'}, {word:'SPOON', emoji:'🥄'}, {word:'GRASS', emoji:'🌿'}, {word:'CRUNCH', emoji:'🍎'}, {word:'BRUSH', emoji:'🖌️'},
+    {word:'CHILL', emoji:'🥶'}, {word:'SWING', emoji:'🐒'}, {word:'TRUMP', emoji:'🎺'}, {word:'SLIDE', emoji:'🛝'}, {word:'BLANK', emoji:'⬜'},
+    {word:'FRESH', emoji:'🥬'}, {word:'GRACE', emoji:'💃'}, {word:'PRINT', emoji:'🖨️'}, {word:'CLERK', emoji:'🧑‍💼'}, {word:'FLUTE', emoji:'🎶'},
+    {word:'CRANE', emoji:'🏗️'}, {word:'SPIKE', emoji:'🔪'}, {word:'SWELL', emoji:'💧'}, {word:'BLESS', emoji:'🙏'}, {word:'GLAZE', emoji:'🍩'},
+    {word:'FIGHT', emoji:'⚔️'}, {word:'COUCH', emoji:'🛋️'}, {word:'STORM', emoji:'⛈️'}, {word:'THUMB', emoji:'👍'}, {word:'SHINE', emoji:'🔆'},
+    {word:'DRIVE', emoji:'🚗'}, {word:'CLOWN', emoji:'🤡'}, {word:'SWIRL', emoji:'🍥'}, {word:'BLADE', emoji:'🔪'}, {word:'WHALE', emoji:'🐳'}
+  ],
+  4: [ 
+    {word:'FLOWER', emoji:'🌸'}, {word:'MONKEY', emoji:'🐒'}, {word:'BANANA', emoji:'🍌'}, {word:'ROCKET', emoji:'🚀'}, {word:'BUTTON', emoji:'🔘'},
+    {word:'WINDOW', emoji:'🖼️'}, {word:'GARAGE', emoji:'🚗'}, {word:'CASTLE', emoji:'🏰'}, {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'PURPLE', emoji:'🟣'},
+    {word:'ORANGE', emoji:'🍊'}, {word:'TURTLE', emoji:'🐢'}, {word:'SHADOW', emoji:'👤'}, {word:'CLOUDY', emoji:'☁️'}, {word:'LITTLE', emoji:'🤏'},
+    {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'}, {word:'TRAVEL', emoji:'🗺️'}, {word:'DRAGON', emoji:'🐉'}, {word:'FINGER', emoji:'👆'},
+    {word:'SILVER', emoji:'🪙'}, {word:'HAPPEN', emoji:'🤯'}, {word:'RETURN', emoji:'↩️'}, {word:'NUMBER', emoji:'🔢'}, {word:'SISTER', emoji:'👧'},
+    {word:'BROKEN', emoji:'💔'}, {word:'SQUARE', emoji:'🟪'}, {word:'CIRCLE', emoji:'⚪'}, {word:'YELLOW', emoji:'🟡'}, {word:'COFFEE', emoji:'☕'},
+    {word:'FLIGHT', emoji:'🛫'}, {word:'WONDER', emoji:'❓'}, {word:'CHURCH', emoji:'⛪'}, {word:'POCKET', emoji:'🪡'}, {word:'TICKET', emoji:'🎫'},
+    {word:'SWEET', emoji:'🍬'}, {word:'SPRING', emoji:'🌷'}, {word:'STREAM', emoji:'🏞️'}, {word:'HEALTH', emoji:'❤️'}, {word:'SUGGEST', emoji:'🤔'},
+    {word:'SECRET', emoji:'🤫'}, {word:'CAREFUL', emoji:'⚠️'}, {word:'EXAMPLE', emoji:'💡'}, {word:'ADDRESS', emoji:'🏠'}, {word:'BALANCE', emoji:'⚖️'},
+    {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PUPPET', emoji:'🎭'}, {word:'LADDER', emoji:'🪜'}, {word:'SILENT', emoji:'🤫'}
+  ],
+  5: [ 
+    {word:'DRAGON', emoji:'🐉'}, {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'},
+    {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'CASTLE', emoji:'🏰'}, {word:'JOURNEY', emoji:'🗺️'}, {word:'MOUNTAIN', emoji:'🏔️'}, {word:'TREASURE', emoji:'💎'},
+    {word:'CHAMPION', emoji:'👑'}, {word:'DIAMOND', emoji:'💍'}, {word:'EAGLE', emoji:'🦅'}, {word:'WHISPER', emoji:'🤫'}, {word:'VOLCANO', emoji:'🌋'},
+    {word:'LANGUAGE', emoji:'🗣️'}, {word:'COMPUTER', emoji:'💻'}, {word:'EXCELLENT', emoji:'⭐'}, {word:'MAGNETIC', emoji:'🧲'}, {word:'HARVEST', emoji:'🌾'},
+    {word:'DISCOVER', emoji:'🔎'}, {word:'HISTORY', emoji:'📜'}, {word:'ADVENTURE', emoji:'🎒'}, {word:'EXPLORER', emoji:'🧭'}, {word:'FORTRESS', emoji:'🛡️'},
+    {word:'GLADIATOR', emoji:'⚔️'}, {word:'MAJESTY', emoji:'👑'}, {word:'MYSTERY', emoji:'❓'}, {word:'TEMPLE', emoji:'🗿'}, {word:'WONDERFUL', emoji:'🤩'},
+    {word:'DELICIOUS', emoji:'😋'}, {word:'FANTASTIC', emoji:'✨'}, {word:'IMAGINE', emoji:'💭'}, {word:'PERFECT', emoji:'💯'}, {word:'SUCCESS', emoji:'✅'},
+    {word:'UNIVERSE', emoji:'🌌'}, {word:'COMFORT', emoji:'🛋️'}, {word:'DELIGHT', emoji:'😄'}, {word:'FICTION', emoji:'📚'}, {word:'GENIUS', emoji:'🧠'},
+    {word:'HONEST', emoji:'🤝'}, {word:'INVEST', emoji:'💰'}, {word:'KNOWLEDGE', emoji:'🎓'}, {word:'LIBERTY', emoji:'🗽'}, {word:'MIRACLE', emoji:'🌟'},
+    {word:'NOURISH', emoji:'🍎'}, {word:'OPPOSITE', emoji:'🔀'}, {word:'PASSION', emoji:'🔥'}, {word:'QUALITY', emoji:'💎'}, {word:'SINCERE', emoji:'💖'}
+  ]
+};
+const GLOVE_DATA = {
+    'base': { name: 'Base Glove', emoji: '🥊', price: 0, perk: 'None' },
+    'training': { name: 'Training Glove', emoji: '🥋', price: 50, perk: 'XP BOOST! Earns +1 Bonus XP.' },
+    'sparkle': { name: 'Sparkle Glove', emoji: '✨', price: 150, perk: 'Coin Magnet! Earns +1 Bonus Coin.' },
+    'gold': { name: 'Gold Glove', emoji: '🥇', price: 500, perk: 'TKO! Extra points on big streaks.' },
+    'champion': { name: 'Champion Glove', emoji: '🏆', price: 1000, perk: 'Final Score Multiplier.' },
+    'hint': { name: 'Hint Glove', emoji: '💡', price: 750, perk: 'Extra Hint' },
+    // *** NEW SHOP ITEMS ***
+    'magnet': { name: 'Magnet Glove', emoji: '🧲', price: 300, perk: 'Auto-place 1st letter.' },
+    'timewarp': { name: 'Time Warp', emoji: '⏳', price: 1200, perk: 'Massive score bonus on Level Up.' },
+    'star': { name: 'Star Glove', emoji: '🌟', price: 2000, perk: 'Guaranteed max score per word.' },
+};
+
+// --- GLOBAL STATE ---
+let store = JSON.parse(localStorage.getItem('spellingBalloon_v2')||'{}');
+let coins = store.coins||0, score=store.score||0, xp=store.xp||0, streak=store.streak||0;
+let maxStreak = store.maxStreak||0; // Track Max Streak
+let wordsSpelled = store.wordsSpelled || 0; // Track total words spelled
+let currentGlove = store.currentGlove||'base'; // Changed default to 'base'
+let ownedGloves = store.ownedGloves || ['base']; // Ensure base is owned
+let levelChoice = parseInt(store.levelChoice||1); // *** FIXED: Load levelChoice from store ***
+let currentWordData = null; // Stores {word: 'X', emoji: 'Y'}
+let currentWord=null, userAnswer=[];
+let isAnimating = false; // Prevent double-clicks during animation
+
+// --- DOM CACHE ---
+const el={
+  glove: document.getElementById('glove'),
+  puzzleImage: document.getElementById('puzzleImage'), // Renamed from 'balloon'
+  score: document.getElementById('score'),
+  slots: document.getElementById('slots'),
+  tiles: document.getElementById('tiles'),
+  submit: document.getElementById('submit'),
+  newBtn: document.getElementById('new'),
+  emojiBtn: document.getElementById('emojiBtn'),
+  feedback: document.getElementById('feedback'),
+  xp: document.getElementById('xp'),
+  xpNext: document.getElementById('xpNext'),
+  streak: document.getElementById('streak'),
+  coins: document.getElementById('coins'),
+  scorePopWrap: document.getElementById('scorePopWrap'),
+  levelSelect: document.getElementById('levelSelect'),
+  themeToggle: document.getElementById('themeToggle'),
+  levelDisplay: document.getElementById('levelDisplay'), 
+  xpContainer: document.getElementById('xpContainer'), // Added XP Container for flashing
+  // Shop DOM elements
+  shopModal: document.getElementById('shopModal'),
+  shopContent: document.getElementById('shopContent'),
+  closeShop: document.getElementById('closeShop'),
+  shopBtn: document.getElementById('shopBtn'),
+  // Progress Modal
+  progressModal: document.getElementById('progressModal'),
+  closeProgressModal: document.getElementById('closeProgressModal'),
+  progressContent: document.getElementById('progressContent'),
+  statsHeader: document.getElementById('statsHeader'), // Clickable header area
+};
+
+/* ======================= Gameplay Functions ======================= */
+function pickWord(){
+  const set=WORD_SETS[levelChoice]||WORD_SETS[1];
+  
+  // Get word index from storage
+  let wordIndex = localStorage.getItem('wordIndex') ? parseInt(localStorage.getItem('wordIndex')) : 0;
+  
+  // If we reach the end of the set, loop back to the beginning
+  if (wordIndex >= set.length) {
+      wordIndex = 0;
+      localStorage.setItem('wordIndex', 0);
+  }
+
+  currentWordData = set[wordIndex];
+  currentWord = currentWordData.word.toUpperCase();
+  el.puzzleImage.textContent = currentWordData.emoji; // Use new element reference
+  el.emojiBtn.textContent = currentWordData.emoji;
+
+  // Update storage for the next word
+  localStorage.setItem('wordIndex', wordIndex + 1);
+
+  renderWord();
+}
+
+function renderWord(){
+  // Clear previous state
+  userAnswer=Array(currentWord.length).fill(null); // Initialize userAnswer array size
+  el.slots.innerHTML=''; 
+  el.tiles.innerHTML='';
+  
+  const letters=currentWord.split('');
+  const extras='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').sort(()=>0.5-Math.random()).slice(0,Math.max(0,Math.min(3,Math.floor(letters.length/2))));
+  const tiles = shuffle([...letters,...extras]);
+
+  // Render slots
+  letters.forEach((l, i)=>{ 
+    const s=document.createElement('div'); 
+    s.className='slot'; 
+    s.dataset.index=i; 
+    s.addEventListener('click',()=>onSlotClick(s)); 
+    el.slots.appendChild(s); 
+  });
+  
+  // Render tiles
+  tiles.forEach((l, i)=>{
+    const t=document.createElement('div'); 
+    t.className='letter bg-white/6'; 
+    t.textContent=l; 
+    t.dataset.letter=l;
+    t.dataset.originalId = i;
+    // Tile click now places the letter into the first available slot
+    t.addEventListener('click',()=>{ onTileClick(t); playSpeech(t.dataset.letter.toLowerCase()); });
+    el.tiles.appendChild(t);
+  });
+  
+  el.feedback.textContent='';
+  updateHUD();
+}
+
+// *** MODIFIED: Logic to place letter in first available slot (Confirmed fix) ***
+function onTileClick(tile){
+  if(tile.style.visibility==='hidden' || isAnimating) return;
+  
+  // Find the index of the first empty slot in the userAnswer array (source of truth)
+  const slotIndex = userAnswer.findIndex(l => l === null);
+  
+  if(slotIndex === -1) {
+      flashFeedback("Boxes are full!");
+      return; 
+  }
+  
+  // Use the index to find the corresponding DOM slot
+  const emptySlot = el.slots.children[slotIndex]; 
+
+  // Place the letter
+  emptySlot.textContent = tile.dataset.letter;
+  emptySlot.dataset.sourceId = tile.dataset.originalId; 
+  tile.style.visibility='hidden';
+  userAnswer[slotIndex]=tile.dataset.letter; // Update the source of truth array
+  
+  // Submission is handled exclusively by the submit() function.
+}
+
+// *** MODIFIED: Logic to remove letter from slot and return tile ***
+function onSlotClick(slot){
+  if(isAnimating) return;
+  const i=Number(slot.dataset.index);
+  if(slot.textContent){
+    const originalId = slot.dataset.sourceId;
+    const letter = slot.textContent;
+    
+    // Clear slot
+    slot.textContent=''; 
+    slot.dataset.sourceId = '';
+    userAnswer[i]=null; // Set back to null
+    
+    // Find the original tile by its stored ID and make it visible
+    const hidden = Array.from(el.tiles.children).find(t=>t.dataset.originalId === originalId);
+    if(hidden) hidden.style.visibility='';
+    
+    // Play sound on retraction (optional, but good feedback)
+    playSpeech(letter.toLowerCase());
+  }
+}
+
+/* ======================= Submit & Punch ======================= */
+function submit(){
+  const attempt=userAnswer.filter(l=>l).join('');
+  
+  // Check if all slots are filled
+  if(attempt.length!==currentWord.length) {
+      flashFeedback("Fill all the boxes first!");
+      return;
+  }
+
+  if(attempt===currentWord) handleCorrect(); else handleWrong();
+}
+
+// --- NEW FUNCTION: Level Up Handler ---
+function levelUp() {
+    const xpNextGoal = 50; 
+    
+    // Check if player has maxed out (Level 5)
+    if (levelChoice >= 5) {
+        flashFeedback("MAX LEVEL REACHED! You are the Champion!");
+        levelChoice = 5; 
+        xp = xpNextGoal; // Keep XP display full
+        saveStore();
+        updateHUD();
+        return;
+    }
+
+    // Level up process
+    levelChoice += 1;
+    xp = xp % xpNextGoal; // Carry over excess XP
+    
+    // Visual Feedback 
+    confetti({ particleCount: 200, spread: 180, origin: { y: 0.5 } });
+    flashFeedback(`LEVEL UP! New Level: ${levelChoice}`);
+
+    // Update level select dropdown to show current level selected
+    el.levelSelect.value = levelChoice;
+
+    saveStore();
+    updateHUD();
+}
+
+function handleCorrect(){
+  isAnimating = true;
+  
+  // --- XP and SCORE Base Calculations ---
+  let baseXP = 5;
+  let bonusXP = 0;
+  let bonusCoins = 0;
+  let baseScore = 10;
+  const xpNextGoal = 50; // XP required for next level
+  
+  // 1. Apply Level Perks
+  if (levelChoice >= 3) {
+      baseXP = 7; // LVL 3 Perk: XP Multiplier
+  }
+  if (levelChoice >= 2) {
+       bonusCoins += 1; // LVL 2 Perk: Coin Magnet
+  }
+  if (levelChoice >= 5) {
+      baseScore += 5; // LVL 5 Perk: Max Score Bonus
+  }
+  
+  // 2. Apply Glove Perks
+  if (currentGlove === 'training') {
+      bonusXP += 1;
+  }
+  if (currentGlove === 'sparkle') {
+      bonusCoins += 1;
+  }
+
+  // 3. Calculate Score (Base Score * Streak Multiplier)
+  let multiplier = 1 + (streak > 0 ? streak / 2 : 0); // 1x, 1.5x, 2x, 2.5x...
+  let gained = Math.round(baseScore * multiplier);
+  
+  if (currentGlove === 'gold' && streak >= 3) {
+      gained += 25; // Gold Glove Perk: Extra points on Streak
+  }
+  
+  score+=gained; 
+  coins+=1 + bonusCoins; 
+  xp+=(baseXP + bonusXP);
+  streak+=1;
+  wordsSpelled+=1; // Increment total words spelled
+  if (streak > maxStreak) maxStreak = streak; // Update max streak
+  
+  // --- VISUAL FEEDBACK TRIGGERS ---
+  // LVL 3 XP Boost Visual
+  if (levelChoice >= 3) {
+    el.xpContainer.classList.add('xp-flash');
+    setTimeout(() => el.xpContainer.classList.remove('xp-flash'), 300);
+  }
+
+  // ------------------------------------
+  
+  showPunch(true,gained);
+  
+  // Check for Level Up AFTER awarding XP
+  if (levelChoice < 5 && xp >= xpNextGoal) {
+      levelUp(); 
+  }
+  
+  // *** FIXED: Use "HIT!" terminology ***
+  flashFeedback(`HIT! +${gained} pts (x${multiplier.toFixed(1)} streak)`);
+  
+  playSpeech(currentWord.toLowerCase()); 
+  saveStore(); 
+  updateHUD(); 
+  
+  // Automatic progress after confirmation delay (1500ms)
+  setTimeout(()=>{
+      isAnimating = false; // *** CRITICAL FIX: Release lock BEFORE picking the word ***
+      pickWord();
+  }, 1500);
+}
+
+function handleWrong(){
+  isAnimating = true;
+  let feedbackMessage = "MISS!";
+  
+  // Apply Combo Retention perk (LVL 4 perk concept implemented via state check)
+  if (levelChoice >= 4) {
+      if (streak > 0) {
+        streak = Math.max(1, streak - 1); // LVL 4 Perk: Drops streak to 1 instead of 0
+        el.streak.classList.add('streak-guard-flash');
+        setTimeout(() => el.streak.classList.remove('streak-guard-flash'), 600);
+        feedbackMessage = "GUARD! Streak Protected.";
+      }
+  } else {
+      streak = 0; // Standard: Lose entire streak
+  }
+  
+  showPunch(false,0); 
+  flashFeedback(feedbackMessage); 
+  score=Math.max(0,score-2); 
+  saveStore(); 
+  updateHUD();
+  
+  setTimeout(() => {
+    isAnimating = false;
+  }, 600); // Release lock after punch animation finishes
+}
+
+function showPunch(hit,gained){
+  const glove=el.glove, balloon=el.puzzleImage; // Use puzzleImage element
+  glove.classList.remove('punching'); balloon.classList.remove('balloonHit'); // Clear old anims
+  
+  if(hit){
+    glove.classList.add('punching'); balloon.classList.add('balloonHit'); 
+    spawnScorePopup('+'+gained, '#ffb400');
+    // Simplified Sparkle Spawning
+    for(let i=0;i<5;i++){ spawnSpark(); }
+    setTimeout(()=>{ glove.classList.remove('punching'); balloon.classList.remove('balloonHit'); },600);
+  } else { 
+    glove.classList.add('punching'); 
+    spawnScorePopup('Miss!', '#ff4500');
+    setTimeout(()=>{ glove.classList.remove('punching'); },500); 
+  }
+}
+
+function spawnScorePopup(text, color){
+  const d=document.createElement('div'); 
+  d.className='scorePop'; 
+  d.textContent=text;
+  d.style.color = color || 'white';
+  d.style.left=(40+Math.random()*60)+'%'; 
+  el.scorePopWrap.appendChild(d); 
+  setTimeout(()=>d.remove(),1000);
+}
+
+function spawnSpark(){
+  const s=document.createElement('div'); s.className='sparkle'; s.textContent='✨';
+  s.style.left=(30+Math.random()*40)+'%'; s.style.bottom='40px';
+  el.scorePopWrap.appendChild(s); setTimeout(()=>s.remove(),800);
+}
+
+/* ======================= Progress Functions ======================= */
+function renderProgressModal() {
+    el.progressContent.innerHTML = `
+        <div class="text-lg font-semibold border-b pb-2 mb-2">Current Status</div>
+        <p>Level: <span class="font-bold text-blue-600">LVL ${levelChoice}</span></p>
+        <p>XP: <span class="font-bold">${xp} / 50</span></p>
+        <p>Current Streak: <span class="font-bold">${streak}</span></p>
+
+        <div class="text-lg font-semibold border-b pb-2 pt-4 mb-2">Lifetime Achievements</div>
+        <p>Total Score Earned: <span class="font-bold">${score}</span></p>
+        <p>Max Streak: <span class="font-bold">${maxStreak}</span></p>
+        <p>Total Words Spelled: <span class="font-bold">${wordsSpelled}</span></p>
+    `;
+    el.progressModal.style.display = 'flex';
+}
+
+
+/* ======================= Shop Functions ======================= */
+function renderShop(){
+    el.shopContent.innerHTML = `
+        <p class="text-xl mb-4 text-black font-bold">Current Coins: ${coins} 💰</p>
+        <div class="grid grid-cols-2 gap-4">
+            ${Object.entries(GLOVE_DATA).map(([id, data]) => {
+                const isOwned = ownedGloves.includes(id);
+                const isEquipped = currentGlove === id;
+                const canAfford = coins >= data.price;
+                
+                let buttonText;
+                let buttonClass;
+                let isDisabled = false;
+
+                if (isEquipped) {
+                    buttonText = 'EQUIPPED';
+                    buttonClass = 'bg-green-600 text-white cursor-default';
+                    isDisabled = true;
+                } else if (isOwned) {
+                    buttonText = 'EQUIP';
+                    buttonClass = 'bg-blue-500 hover:bg-blue-600 text-white';
+                } else if (canAfford) {
+                    buttonText = `BUY (${data.price} 💰)`;
+                    buttonClass = 'bg-amber-500 hover:bg-amber-600 text-black';
+                } else {
+                    buttonText = `NEED ${data.price} 💰`;
+                    buttonClass = 'bg-gray-300 text-gray-500 cursor-not-allowed';
+                    isDisabled = true;
+                }
+
+                return `
+                    <div class="shopItem flex flex-col items-center p-3 text-center border ${isEquipped ? 'border-green-400' : 'border-gray-700'}">
+                        <div class="text-4xl mb-2">${data.emoji}</div>
+                        <p class="font-bold">${data.name}</p>
+                        <p class="text-sm text-gray-700 mb-2">${data.perk}</p>
+                        <button 
+                            class="w-full text-sm py-2 rounded font-semibold mt-auto ${buttonClass}"
+                            ${isDisabled ? 'disabled' : ''}
+                            onclick="handleShopAction('${id}', ${data.price}, ${isOwned})"
+                        >
+                            ${buttonText}
+                        </button>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+    el.shopModal.classList.remove('hidden');
+    el.shopModal.classList.add('flex');
+}
+
+window.handleShopAction = (gloveId, price, isOwned) => {
+    if (isOwned === true) {
+        currentGlove = gloveId;
+        playSpeech(`${GLOVE_DATA[gloveId].name} equipped!`);
+        updateHUD();
+        saveStore();
+        renderShop(); // Re-render to show equipped status
+    } else if (coins >= price) {
+        coins -= price;
+        ownedGloves.push(gloveId);
+        currentGlove = gloveId;
+        playSpeech(`Purchased and equipped ${GLOVE_DATA[gloveId].name}!`);
+        updateHUD();
+        saveStore();
+        renderShop(); // Re-render to update coin count and buttons
+    } else {
+        playSpeech("Not enough coins!");
+    }
+};
+
+/* ======== Keyboard Support (Minor cleanup) ======== */
+document.addEventListener('keydown', e=>{
+  if (isAnimating) return;
+  if(e.key==='Backspace'){ 
+    e.preventDefault(); // Stop browser back action
+    // Find the last filled index
+    const lastFilledIndex = [...userAnswer].reverse().findIndex(l => l !== null);
+    if (lastFilledIndex !== -1) {
+        // Translate reversed index back to normal index
+        const index = currentWord.length - 1 - lastFilledIndex;
+        onSlotClick(el.slots.children[index]); 
+    }
+  }
+  else if(e.key==='Enter'){ 
+    e.preventDefault(); // Stop browser default enter action
+    submit();
+  }
+  else if(/^[a-zA-Z]$/.test(e.key)){ 
+    e.preventDefault(); // Prevent accidental scrolling/typing outside
+    const letter=e.key.toUpperCase(); 
+    // Find the tile that corresponds to the key press AND is currently visible
+    const tile=Array.from(el.tiles.children).find(t=>t.dataset.letter===letter && t.style.visibility!=='hidden'); 
+    if(tile) {
+      onTileClick(tile); 
+      playSpeech(letter.toLowerCase()); // Use lowercase for better pronunciation
+    }
+  }
+});
+
+/* ======== Button Events ======== */
+// Click button says the whole word
+el.emojiBtn.addEventListener('click',()=>playSpeech(currentWord.toLowerCase()));
+el.submit.addEventListener('click',submit);
+el.newBtn.addEventListener('click',pickWord);
+el.shopBtn.addEventListener('click', renderShop); // Open the shop modal
+el.closeShop.addEventListener('click', () => { // Close the shop modal
+    el.shopModal.classList.add('hidden');
+    el.shopModal.classList.remove('flex');
+});
+el.statsHeader.addEventListener('click', renderProgressModal);
+el.closeProgressModal.addEventListener('click', () => {
+    el.progressModal.style.display = 'none';
+});
+
+// --- Theme Toggle Functionality ---
+el.themeToggle.addEventListener('click', () => {
+    const body = document.body;
+    const currentTheme = body.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('sb_theme', newTheme);
+});
+
+/* ======== Level select ======== */
+el.levelSelect.value=levelChoice;
+el.levelSelect.addEventListener('change',e=>{ 
+    levelChoice=parseInt(e.target.value); 
+    localStorage.setItem('sb_level',levelChoice); 
+    localStorage.setItem('wordIndex', 0); // *** IMPORTANT: Reset word index when level changes ***
+    pickWord(); 
+});
+
+/* ======== Utils ======== */
+function flashFeedback(t){ el.feedback.textContent=t; setTimeout(()=>{ if(el.feedback.textContent===t) el.feedback.textContent=''; },1500); }
+function saveStore(){ 
+  // Save current XP/Level Choice to maintain leveling progression across sessions
+  localStorage.setItem('spellingBalloon_v2',JSON.stringify({coins,score,xp,streak,maxStreak, wordsSpelled, currentGlove, ownedGloves, levelChoice})); 
+}
+function updateHUD(){ 
+  const xpNextGoal = 50;
+  el.score.textContent=`Score: ${score}`; 
+  el.coins.textContent=coins; 
+  el.xp.textContent=xp; 
+  el.xpNext.textContent=xpNextGoal;
+  el.streak.textContent=streak; 
+  el.glove.textContent = GLOVE_DATA[currentGlove].emoji;
+  
+  // Update Level Display
+  if(el.levelDisplay) el.levelDisplay.textContent = `LVL ${levelChoice}`; 
+
+  // *** VISUAL PERK: LVL 2 Coin Magnet ***
+  if (levelChoice >= 2) {
+      el.coins.classList.add('gold-boost');
+  } else {
+      el.coins.classList.remove('gold-boost');
+  }
+
+  // *** VISUAL PERK: LVL 4 Combo Guard ***
+  if (levelChoice >= 4) {
+      el.streak.classList.add('streak-guard');
+  } else {
+      el.streak.classList.remove('streak-guard');
+  }
+}
+
+/* ======== Init ======== */
+// Load theme preference
+document.body.setAttribute('data-theme', localStorage.getItem('sb_theme') || 'dark');
+
+// *** NOTE: The core gameplay loop is now fixed to use and advance the 'wordIndex' in localStorage. ***
+pickWord(); updateHUD(); saveStore();
+</script>
+</body>
+</html>
