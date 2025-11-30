@@ -394,17 +394,24 @@ function playSpeech(text){
     window.speechSynthesis.cancel(); 
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US'; 
-    u.rate = 0.9;
-    u.pitch = 1.0;
-    u.volume = 1.0;
+    
+    // *** CLARITY UPDATES ***
+    u.rate = 0.8;    // 0.8 is the "Teacher Sweet Spot" (Clear, not dragging)
+    u.pitch = 1.05;  // Slight brightness boost to help hear "T", "S", "K" sounds
+    u.volume = 1.0; 
+
     if (availableVoices.length === 0) {
         availableVoices = window.speechSynthesis.getVoices();
     }
+    
+    // Priority List for Clarity
     const bestVoice = availableVoices.find(v => v.name.includes("Google US English")) 
                    || availableVoices.find(v => v.name.includes("Samantha"))          
                    || availableVoices.find(v => v.name.includes("Microsoft Zira"))    
                    || availableVoices.find(v => v.lang === 'en-US');                  
+    
     if (bestVoice) u.voice = bestVoice;
+
     window.speechSynthesis.speak(u);
   } catch(e){console.warn(e);} 
 }
@@ -429,7 +436,11 @@ const VictoryScene = {
         this.scene.background = new THREE.Color(0x050510);
         this.scene.fog = new THREE.FogExp2(0x050510, 0.02);
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.camera.position.set(0, 2, 8);
+// *** FIX: Move camera back on mobile ***
+        const aspect = window.innerWidth / window.innerHeight;
+        const zDist = aspect < 1 ? 16 : 8; // If portrait, move to 16. If landscape, stay at 8.
+        this.camera.position.set(0, 2, zDist);
+        // ************************************
         this.camera.lookAt(0, 1, 0);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -585,10 +596,19 @@ const VictoryScene = {
         this.boxer.mesh.userData.punching = hand;
         this.boxer.mesh.userData.punchTime = 0;
     },
-    onWindowResize() {
+onWindowResize() {
         if(!this.camera || !this.renderer) return;
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        
+        // 1. Update Aspect Ratio
+        const aspect = window.innerWidth / window.innerHeight;
+        this.camera.aspect = aspect;
         this.camera.updateProjectionMatrix();
+        
+        // 2. *** FIX: Re-calculate distance on rotation ***
+        const zDist = aspect < 1 ? 16 : 8; 
+        this.camera.position.set(0, 2, zDist);
+        
+        // 3. Resize Renderer
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     },
     animate() {
