@@ -43,6 +43,50 @@ button, .letter, .slot { touch-action: manipulation; }
 body { font-family:Inter, sans-serif; background:var(--bg-secondary); color:var(--text-primary); padding:18px; height:100%; }
 .card { background:var(--card-bg); border:1px solid rgba(255,255,255,0.04); position: relative; }
 
+/* LEVEL THEMES (1-10) */
+body.lvl-1 { background: radial-gradient(circle at center, #f0fdf4, #bbf7d0); } /* Green */
+body.lvl-2 { background: radial-gradient(circle at center, #eff6ff, #bfdbfe); } /* Blue */
+body.lvl-3 { background: radial-gradient(circle at center, #faf5ff, #e9d5ff); } /* Purple */
+body.lvl-4 { background: radial-gradient(circle at center, #fff7ed, #fed7aa); } /* Orange */
+body.lvl-5 { background: radial-gradient(circle at center, #fef2f2, #fecaca); } /* Red */
+body.lvl-6 { background: radial-gradient(circle at center, #2dd4bf, #0f766e); } /* Teal */
+body.lvl-7 { background: radial-gradient(circle at center, #a8a29e, #44403c); } /* Stone */
+body.lvl-8 { background: radial-gradient(circle at center, #f472b6, #831843); } /* Pink */
+body.lvl-9 { background: radial-gradient(circle at center, #fbbf24, #78350f); } /* Gold */
+body.lvl-10 { background: radial-gradient(circle at center, #818cf8, #312e81); } /* Indigo */
+
+/* Dark Mode Overrides for Themes */
+body[data-theme="dark"].lvl-1 { background: radial-gradient(circle at center, #052e16, #022c22); }
+body[data-theme="dark"].lvl-2 { background: radial-gradient(circle at center, #172554, #0f172a); }
+body[data-theme="dark"].lvl-3 { background: radial-gradient(circle at center, #3b0764, #2e1065); }
+body[data-theme="dark"].lvl-4 { background: radial-gradient(circle at center, #431407, #2a0a05); }
+body[data-theme="dark"].lvl-5 { background: radial-gradient(circle at center, #450a0a, #2b0808); }
+body[data-theme="dark"].lvl-6 { background: radial-gradient(circle at center, #115e59, #042f2e); }
+body[data-theme="dark"].lvl-7 { background: radial-gradient(circle at center, #57534e, #1c1917); }
+body[data-theme="dark"].lvl-8 { background: radial-gradient(circle at center, #831843, #500724); }
+body[data-theme="dark"].lvl-9 { background: radial-gradient(circle at center, #78350f, #451a03); }
+body[data-theme="dark"].lvl-10 { background: radial-gradient(circle at center, #312e81, #1e1b4b); }
+
+/* PHONICS COLORS */
+.letter.vowel {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important; /* Red */
+    border: 2px solid #991b1b;
+    color: white; text-shadow: 1px 1px 0 #7f1d1d;
+}
+.letter.consonant {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important; /* Blue */
+    border: 2px solid #1e40af;
+    color: white; text-shadow: 1px 1px 0 #1e3a8a;
+}
+
+/* BOSS MODE */
+@keyframes redAlarm {
+    0% { background-color: var(--bg-secondary); box-shadow: inset 0 0 0 0 red; }
+    50% { background-color: #3f0e0e; box-shadow: inset 0 0 100px 20px rgba(255,0,0,0.5); }
+    100% { background-color: var(--bg-secondary); box-shadow: inset 0 0 0 0 red; }
+}
+.boss-mode { animation: redAlarm 1.5s infinite ease-in-out !important; }
+
 /* Game Elements */
 .letter { width: 65px; height: 65px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight: 900; font-size: 32px; cursor:pointer; user-select:none; color: var(--text-primary); background-color: var(--bg-primary); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
 .slot { width: 65px; height: 65px; border-radius:12px; border: 4px dashed rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size: 32px; font-weight: 900; }
@@ -68,54 +112,7 @@ body { font-family:Inter, sans-serif; background:var(--bg-secondary); color:var(
 .streak-guard { color: #ffd700; text-shadow: 0 0 3px #ffa500; }
 .modal { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); display: none; align-items: center; justify-content: center; z-index: 1000; }
 .modal-content { background-color: white; color: #333; padding: 24px; border-radius: 12px; position: relative; max-height: 85vh; overflow-y: auto; }
-/* ... (Your other styles are up here) ... */
-
-.shake-effect {
-  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-/* *** PASTE THE NEW CODE HERE *** */
-/* BOSS MODE ANIMATIONS */
-@keyframes redAlarm {
-    0% { background-color: var(--bg-secondary); box-shadow: inset 0 0 0 0 red; }
-    50% { background-color: #3f0e0e; box-shadow: inset 0 0 100px 20px rgba(255,0,0,0.5); }
-    100% { background-color: var(--bg-secondary); box-shadow: inset 0 0 0 0 red; }
-}
-.boss-mode {
-    animation: redAlarm 1.5s infinite ease-in-out !important;
-}
-.boss-text {
-    color: #ff0000 !important;
-    text-shadow: 0 0 10px red;
-    transform: scale(1.2);
-}
-/* LEVEL THEMES */
-body.lvl-1 { background: radial-gradient(circle at center, #f0fdf4, #bbf7d0); } /* Green */
-body.lvl-2 { background: radial-gradient(circle at center, #eff6ff, #bfdbfe); } /* Blue */
-body.lvl-3 { background: radial-gradient(circle at center, #faf5ff, #e9d5ff); } /* Purple */
-body.lvl-4 { background: radial-gradient(circle at center, #fff7ed, #fed7aa); } /* Orange */
-body.lvl-5 { background: radial-gradient(circle at center, #fef2f2, #fecaca); } /* Red */
-
-/* Dark Mode Overrides for Themes */
-body[data-theme="dark"].lvl-1 { background: radial-gradient(circle at center, #052e16, #022c22); }
-body[data-theme="dark"].lvl-2 { background: radial-gradient(circle at center, #172554, #0f172a); }
-body[data-theme="dark"].lvl-3 { background: radial-gradient(circle at center, #3b0764, #2e1065); }
-body[data-theme="dark"].lvl-4 { background: radial-gradient(circle at center, #431407, #2a0a05); }
-body[data-theme="dark"].lvl-5 { background: radial-gradient(circle at center, #450a0a, #2b0808); }
-/* PHONICS COLORS */
-.letter.vowel {
-    background: linear-gradient(135deg, #ef4444, #dc2626) !important; /* Red */
-    border: 2px solid #991b1b;
-    color: white;
-    text-shadow: 1px 1px 0 #7f1d1d;
-}
-.letter.consonant {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important; /* Blue */
-    border: 2px solid #1e40af;
-    color: white;
-    text-shadow: 1px 1px 0 #1e3a8a;
-}
-</style> 
+</style>
 </head>
 
 <body data-theme="dark">
@@ -163,12 +160,17 @@ body[data-theme="dark"].lvl-5 { background: radial-gradient(circle at center, #4
         <div class="mb-3 flex items-center justify-between">
           <div class="text-sm text-gray-300">Tap letters to build the word. Press Enter to submit.</div>
           <div class="flex gap-2">
-            <select id="levelSelect" class="rounded px-2 py-1">
-              <option value="1">Level 1</option>
-              <option value="2">Level 2</option>
-              <option value="3">Level 3</option>
-              <option value="4">Level 4</option>
-              <option value="5">Mixed</option>
+            <select id="levelSelect" class="rounded px-2 py-1 bg-gray-800 border border-gray-600 text-white font-bold focus:outline-none focus:border-yellow-400">
+              <option value="1">Lvl 1: CVC (Consonant-Vowel-Consonant)</option>
+              <option value="2">Lvl 2: Sight Words (Kindergarten)</option>
+              <option value="3">Lvl 3: Consonant Blends (FL-, -MP)</option>
+              <option value="4">Lvl 4: Sight Words (1st Grade)</option>
+              <option value="5">Lvl 5: Magic E (CVCe)</option>
+              <option value="6">Lvl 6: Vowel Teams (Long Vowels)</option>
+              <option value="7">Lvl 7: Bossy R (AR, OR, IR)</option>
+              <option value="8">Lvl 8: Diphthongs (Complex Vowels)</option>
+              <option value="9">Lvl 9: Sight Words (2nd Grade)</option>
+              <option value="10">Lvl 10: Compound Words (Challenge)</option>
             </select>
           </div>
         </div>
@@ -178,6 +180,7 @@ body[data-theme="dark"].lvl-5 { background: radial-gradient(circle at center, #4
 
         <div class="mt-4 flex gap-2">
           <button id="submit" class="px-5 py-3 rounded bg-amber-400 text-black font-bold">Submit</button>
+          <button id="hintBtn" class="px-4 py-3 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold border-b-4 border-blue-800 active:border-b-0 active:translate-y-1">💡 Hint (20)</button>
           <button id="new" class="px-4 py-3 rounded bg-white/6">New Word</button>
           <button id="themeToggle" class="px-4 py-3 rounded bg-white/10 text-gray-400">🌙/☀️</button>
           <button id="shopBtn" class="px-4 py-3 rounded bg-yellow-500 text-black font-bold">💰 Shop</button>
@@ -246,13 +249,28 @@ body[data-theme="dark"].lvl-5 { background: radial-gradient(circle at center, #4
 </div>
 
 <script>
-// --- DATA: RESTORED EMOJIS ---
+// --- DATA: 10-LEVEL CURRICULUM ---
 const WORD_SETS = {
-  1: [ {word:'CAT', emoji:'🐱'}, {word:'DOG', emoji:'🐶'}, {word:'SUN', emoji:'☀️'}, {word:'BED', emoji:'🛏️'}, {word:'HAT', emoji:'🎩'}, {word:'MUG', emoji:'☕'}, {word:'FOG', emoji:'🌫️'}, {word:'RUG', emoji:'🛋️'}, {word:'BUS', emoji:'🚌'}, {word:'PIG', emoji:'🐷'}, {word:'MAP', emoji:'🗺️'}, {word:'FOX', emoji:'🦊'}, {word:'KEY', emoji:'🔑'}, {word:'JAM', emoji:'🍓'}, {word:'PEN', emoji:'🖊️'}, {word:'TEN', emoji:'🔟'}, {word:'NET', emoji:'🥅'}, {word:'WET', emoji:'💧'}, {word:'MOP', emoji:'🧹'}, {word:'TOP', emoji:'🔝'}, {word:'VAN', emoji:'🚐'}, {word:'WAX', emoji:'🕯️'}, {word:'BOX', emoji:'📦'}, {word:'HEN', emoji:'🐔'}, {word:'FIN', emoji:'🦈'}, {word:'LIP', emoji:'👄'}, {word:'ZIP', emoji:'🤐'}, {word:'JOG', emoji:'🏃'}, {word:'BAG', emoji:'🛍️'}, {word:'TAG', emoji:'🏷️'}, {word:'CAB', emoji:'🚕'}, {word:'MAD', emoji:'😡'}, {word:'DAD', emoji:'👨‍👧‍👦'}, {word:'SAD', emoji:'😞'}, {word:'PAD', emoji:'📝'}, {word:'GUM', emoji:'🍬'}, {word:'TUB', emoji:'🛁'}, {word:'NUT', emoji:'🌰'}, {word:'CUT', emoji:'✂️'}, {word:'SIT', emoji:'🪑'}, {word:'HIT', emoji:'💥'}, {word:'FIT', emoji:'💪'}, {word:'SIX', emoji:'6️⃣'}, {word:'MIX', emoji:'🔀'}, {word:'WIG', emoji:'👩‍🦱'}, {word:'FIG', emoji:'🥝'}, {word:'JET', emoji:'✈️'}, {word:'LEG', emoji:'🦵'}, {word:'HOG', emoji:'🐗'}, {word:'DOT', emoji:'🔴'}, {word:'WEB', emoji:'🕸️'}, {word:'CAN', emoji:'🥫'}, {word:'LAD', emoji:'👦'}, {word:'LID', emoji:'🍾'}, {word:'YEP', emoji:'✅'}, {word:'COB', emoji:'🌽'}, {word:'GAB', emoji:'🗣️'}, {word:'JOB', emoji:'💼'}, {word:'COD', emoji:'🐟'}, {word:'JIB', emoji:'⛵'}, {word:'GOT', emoji:'📥'}, {word:'HIS', emoji:'👆'}, {word:'HOW', emoji:'❓'} ],
-  2: [ {word:'CAKE', emoji:'🎂'}, {word:'GUST', emoji:'💨'}, {word:'FISH', emoji:'🐟'}, {word:'BIKE', emoji:'🚲'}, {word:'NOTE', emoji:'📝'}, {word:'TREE', emoji:'🌳'}, {word:'WAVE', emoji:'🌊'}, {word:'GAME', emoji:'🎮'}, {word:'HOME', emoji:'🏠'}, {word:'CUBE', emoji:'🧊'}, {word:'ROSE', emoji:'🌹'}, {word:'FIRE', emoji:'🔥'}, {word:'SHOE', emoji:'👟'}, {word:'FROG', emoji:'🐸'}, {word:'FLAG', emoji:'🚩'}, {word:'DRUM', emoji:'🥁'}, {word:'SLIP', emoji:'🛼'}, {word:'PLUG', emoji:'🔌'}, {word:'TWIN', emoji:'👯‍♀️'}, {word:'STEP', emoji:'👣'}, {word:'GRIN', emoji:'😁'}, {word:'GLOW', emoji:'✨'}, {word:'STAR', emoji:'⭐'}, {word:'SHIP', emoji:'🚢'}, {word:'SWAN', emoji:'🦢'}, {word:'TRAP', emoji:'🪤'}, {word:'BRAG', emoji:'🗣️'}, {word:'CLIP', emoji:'📎'}, {word:'DROP', emoji:'💧'}, {word:'SPOT', emoji:'⚫'}, {word:'TUBE', emoji:'🧴'}, {word:'RIDE', emoji:'🎢'}, {word:'DIME', emoji:'🪙'}, {word:'LAKE', emoji:'🏞️'}, {word:'RULE', emoji:'📏'}, {word:'VOTE', emoji:'🗳️'}, {word:'DUCK', emoji:'🦆'}, {word:'MILK', emoji:'🥛'}, {word:'HAND', emoji:'✋'}, {word:'TENT', emoji:'⛺'}, {word:'JUMP', emoji:'🤸'}, {word:'KITE', emoji:'🪁'}, {word:'BUMP', emoji:'💥'}, {word:'MASK', emoji:'🎭'}, {word:'POND', emoji:'🏞️'}, {word:'YARN', emoji:'🧶'}, {word:'WOLF', emoji:'🐺'}, {word:'PINK', emoji:'🌸'}, {word:'BELT', emoji:'🥋'}, {word:'GIFT', emoji:'🎁'}, {word:'NEST', emoji:'🪹'}, {word:'SPIN', emoji:'💫'}, {word:'SLOB', emoji:'🤮'}, {word:'CLAN', emoji:'👨‍👩‍👧'}, {word:'FLIP', emoji:'🤸'}, {word:'CLOP', emoji:'🐴'}, {word:'BRIM', emoji:'🧢'}, {word:'BLOT', emoji:'🧻'}, {word:'CRUX', emoji:'✝️'}, {word:'FLAT', emoji:'📐'}, {word:'GRIP', emoji:'🤝'}, {word:'HUMP', emoji:'🐪'}, {word:'JILT', emoji:'💔'}, {word:'LISP', emoji:'👅'}, {word:'MUST', emoji:'📝'}, {word:'SHED', emoji:'🏡'}, {word:'SOAP', emoji:'🧼'}, {word:'STEM', emoji:'🌱'}, {word:'TUCK', emoji:'🧺'}, {word:'TWIG', emoji:'🌿'} ],
-  3: [ {word:'APPLE', emoji:'🍎'}, {word:'PLANT', emoji:'🪴'}, {word:'SWEEP', emoji:'🧹'}, {word:'GLOBE', emoji:'🌍'}, {word:'HOUSE', emoji:'🏠'}, {word:'SNAKE', emoji:'🐍'}, {word:'WATER', emoji:'💧'}, {word:'TIGER', emoji:'🐯'}, {word:'FANCY', emoji:'💎'}, {word:'SHARK', emoji:'🦈'}, {word:'HEART', emoji:'❤️'}, {word:'PIRATE', emoji:'🏴‍☠️'}, {word:'DRAGON', emoji:'🐉'}, {word:'CHEST', emoji:'📦'}, {word:'CLOUD', emoji:'☁️'}, {word:'TRAIN', emoji:'🚂'}, {word:'PANDA', emoji:'🐼'}, {word:'FROSTY', emoji:'❄️'}, {word:'CROWD', emoji:'🧍'}, {word:'SCREAM', emoji:'😱'}, {word:'TRICKY', emoji:'🃏'}, {word:'QUEEN', emoji:'👑'}, {word:'SPOON', emoji:'🥄'}, {word:'GRASS', emoji:'🌿'}, {word:'CRUNCH', emoji:'🍎'}, {word:'BRUSH', emoji:'🖌️'}, {word:'CHILL', emoji:'🥶'}, {word:'SWING', emoji:'🐒'}, {word:'TRUMP', emoji:'🎺'}, {word:'SLIDE', emoji:'🛝'}, {word:'BLANK', emoji:'⬜'}, {word:'FRESH', emoji:'🥬'}, {word:'GRACE', emoji:'💃'}, {word:'PRINT', emoji:'🖨️'}, {word:'CLERK', emoji:'🧑‍💼'}, {word:'FLUTE', emoji:'🎶'}, {word:'CRANE', emoji:'🏗️'}, {word:'SPIKE', emoji:'🔪'}, {word:'SWELL', emoji:'💧'}, {word:'BLESS', emoji:'🙏'}, {word:'GLAZE', emoji:'🍩'}, {word:'FIGHT', emoji:'⚔️'}, {word:'COUCH', emoji:'🛋️'}, {word:'STORM', emoji:'⛈️'}, {word:'THUMB', emoji:'👍'}, {word:'SHINE', emoji:'🔆'}, {word:'DRIVE', emoji:'🚗'}, {word:'CLOWN', emoji:'🤡'}, {word:'SWIRL', emoji:'🍥'}, {word:'BLADE', emoji:'🔪'}, {word:'WHALE', emoji:'🐳'}, {word:'GHOST', emoji:'👻'}, {word:'WHIRL', emoji:'🌪️'}, {word:'CATCH', emoji:'🧤'}, {word:'SMOKE', emoji:'💨'}, {word:'TRASH', emoji:'🗑️'}, {word:'CRUST', emoji:'🍞'}, {word:'PLUME', emoji:'💨'}, {word:'ACORN', emoji:'🌰'}, {word:'SPANK', emoji:'✋'}, {word:'GLORY', emoji:'🌟'}, {word:'TWIRL', emoji:'💃'}, {word:'SLUMP', emoji:'😔'}, {word:'CHURN', emoji:'🐄'}, {word:'FLUSH', emoji:'🚽'}, {word:'GRUMP', emoji:'😠'}, {word:'BLAST', emoji:'💥'}, {word:'SHAME', emoji:'😳'}, {word:'BLEAK', emoji:'😔'}, {word:'PLUSH', emoji:'🧸'}, {word:'WRING', emoji:'🧼'} ],
-  4: [ {word:'FLOWER', emoji:'🌸'}, {word:'MONKEY', emoji:'🐒'}, {word:'BANANA', emoji:'🍌'}, {word:'ROCKET', emoji:'🚀'}, {word:'BUTTON', emoji:'🔘'}, {word:'WINDOW', emoji:'🖼️'}, {word:'GARAGE', emoji:'🚗'}, {word:'CASTLE', emoji:'🏰'}, {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'PURPLE', emoji:'🟣'}, {word:'ORANGE', emoji:'🍊'}, {word:'TURTLE', emoji:'🐢'}, {word:'SHADOW', emoji:'👤'}, {word:'CLOUDY', emoji:'☁️'}, {word:'LITTLE', emoji:'🤏'}, {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'}, {word:'TRAVEL', emoji:'🗺️'}, {word:'DRAGON', emoji:'🐉'}, {word:'FINGER', emoji:'👆'}, {word:'SILVER', emoji:'🪙'}, {word:'HAPPEN', emoji:'🤯'}, {word:'RETURN', emoji:'↩️'}, {word:'NUMBER', emoji:'🔢'}, {word:'SISTER', emoji:'👧'}, {word:'BROKEN', emoji:'💔'}, {word:'SQUARE', emoji:'🟪'}, {word:'CIRCLE', emoji:'⚪'}, {word:'YELLOW', emoji:'🟡'}, {word:'COFFEE', emoji:'☕'}, {word:'FLIGHT', emoji:'🛫'}, {word:'WONDER', emoji:'❓'}, {word:'CHURCH', emoji:'⛪'}, {word:'POCKET', emoji:'👖'}, {word:'TICKET', emoji:'🎫'}, {word:'SWEET', emoji:'🍬'}, {word:'SPRING', emoji:'🌷'}, {word:'STREAM', emoji:'🏞️'}, {word:'HEALTH', emoji:'❤️'}, {word:'SUGGEST', emoji:'🤔'}, {word:'SECRET', emoji:'🤫'}, {word:'CAREFUL', emoji:'⚠️'}, {word:'EXAMPLE', emoji:'💡'}, {word:'ADDRESS', emoji:'🏠'}, {word:'BALANCE', emoji:'⚖️'}, {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PUPPET', emoji:'🎭'}, {word:'LADDER', emoji:'🪜'}, {word:'SILENT', emoji:'🤫'}, {word:'QUIVER', emoji:'🏹'}, {word:'FLICKER', emoji:'🕯️'}, {word:'SNOWMAN', emoji:'⛄'}, {word:'CHICKEN', emoji:'🐔'}, {word:'PROBLEM', emoji:'❓'}, {word:'SPARROW', emoji:'🐦'}, {word:'MEASURE', emoji:'📏'}, {word:'BALANCE', emoji:'⚖️'}, {word:'ADULT', emoji:'🧑'}, {word:'ELEVATOR', emoji:'⬆️'}, {word:'CHESTNUT', emoji:'🌰'}, {word:'DISCUSS', emoji:'💬'}, {word:'ELEMENT', emoji:'🧪'}, {word:'HISTORY', emoji:'📜'}, {word:'MAGICAL', emoji:'🪄'}, {word:'MARVEL', emoji:'😮'}, {word:'PERFECT', emoji:'💯'}, {word:'SUCCESS', emoji:'✅'}, {word:'TREASURE', emoji:'💎'}, {word:'WONDER', emoji:'✨'} ],
-  5: [ {word:'DRAGON', emoji:'🐉'}, {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'}, {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'CASTLE', emoji:'🏰'}, {word:'JOURNEY', emoji:'🗺️'}, {word:'MOUNTAIN', emoji:'🏔️'}, {word:'TREASURE', emoji:'💎'}, {word:'CHAMPION', emoji:'👑'}, {word:'DIAMOND', emoji:'💍'}, {word:'EAGLE', emoji:'🦅'}, {word:'WHISPER', emoji:'🤫'}, {word:'VOLCANO', emoji:'🌋'}, {word:'LANGUAGE', emoji:'🗣️'}, {word:'COMPUTER', emoji:'💻'}, {word:'EXCELLENT', emoji:'⭐'}, {word:'MAGNETIC', emoji:'🧲'}, {word:'HARVEST', emoji:'🌾'}, {word:'DISCOVER', emoji:'🔎'}, {word:'HISTORY', emoji:'📜'}, {word:'ADVENTURE', emoji:'🎒'}, {word:'EXPLORER', emoji:'🧭'}, {word:'FORTRESS', emoji:'🛡️'}, {word:'GLADIATOR', emoji:'⚔️'}, {word:'MAJESTY', emoji:'👑'}, {word:'MYSTERY', emoji:'❓'}, {word:'TEMPLE', emoji:'🗿'}, {word:'WONDERFUL', emoji:'🤩'}, {word:'DELICIOUS', emoji:'😋'}, {word:'FANTASTIC', emoji:'✨'}, {word:'IMAGINE', emoji:'💭'}, {word:'PERFECT', emoji:'💯'}, {word:'SUCCESS', emoji:'✅'}, {word:'UNIVERSE', emoji:'🌌'}, {word:'COMFORT', emoji:'🛋️'}, {word:'DELIGHT', emoji:'😄'}, {word:'FICTION', emoji:'📚'}, {word:'GENIUS', emoji:'🧠'}, {word:'HONEST', emoji:'🤝'}, {word:'INVEST', emoji:'💰'}, {word:'KNOWLEDGE', emoji:'🎓'}, {word:'LIBERTY', emoji:'🗽'}, {word:'MIRACLE', emoji:'🌟'}, {word:'NOURISH', emoji:'🍎'}, {word:'OPPOSITE', emoji:'🔀'}, {word:'PASSION', emoji:'🔥'}, {word:'QUALITY', emoji:'💎'}, {word:'SINCERE', emoji:'💖'}, {word:'ACCOMPLISH', emoji:'✅'}, {word:'CHALLENGE', emoji:'🧗'}, {word:'EDUCATION', emoji:'🎓'}, {word:'ENTERPRISE', emoji:'🚀'}, {word:'EXPERIENCE', emoji:'💡'}, {word:'GOVERNMENT', emoji:'🏛️'}, {word:'IMPROVEMENT', emoji:'📈'}, {word:'INTELLIGENCE', emoji:'🧠'}, {word:'LEADERSHIP', emoji:'👑'}, {word:'MANAGEMENT', emoji:'💼'}, {word:'OPPORTUNITY', emoji:'🎁'}, {word:'PARTNERSHIP', emoji:'🤝'}, {word:'PERFORMANCE', emoji:'🏆'}, {word:'PROFESSIONAL', emoji:'🧑‍💼'}, {word:'RESPONSIBLE', emoji:'🛡️'}, {word:'STRATEGY', emoji:'♟️'}, {word:'TECHNOLOGY', emoji:'🤖'}, {word:'UNDERSTAND', emoji:'🤔'}, {word:'VISIONARY', emoji:'👁️'}, {word:'WELLNESS', emoji:'⚕️'} ]
+  // 1. CVC WORDS
+  1: [ {word:'CAT', emoji:'🐱'}, {word:'DOG', emoji:'🐶'}, {word:'SUN', emoji:'☀️'}, {word:'PIG', emoji:'🐷'}, {word:'BUS', emoji:'🚌'}, {word:'MAP', emoji:'🗺️'}, {word:'FOX', emoji:'🦊'}, {word:'BED', emoji:'🛏️'}, {word:'BAT', emoji:'🦇'}, {word:'BOX', emoji:'📦'}, {word:'NET', emoji:'🥅'}, {word:'WEB', emoji:'🕸️'}, {word:'PEN', emoji:'🖊️'}, {word:'HEN', emoji:'🐔'}, {word:'LIP', emoji:'👄'}, {word:'TOP', emoji:'🔝'}, {word:'MOP', emoji:'🧹'}, {word:'POT', emoji:'🍲'}, {word:'LOG', emoji:'🪵'}, {word:'BUG', emoji:'🐛'}, {word:'RUG', emoji:'🛋️'}, {word:'MUG', emoji:'☕'}, {word:'NUT', emoji:'🌰'}, {word:'CUT', emoji:'✂️'}, {word:'RUN', emoji:'🏃'}, {word:'SIX', emoji:'6️⃣'}, {word:'TEN', emoji:'🔟'}, {word:'JAM', emoji:'🍓'}, {word:'JET', emoji:'✈️'}, {word:'VAN', emoji:'🚐'} ],
+  // 2. KINDERGARTEN SIGHT WORDS
+  2: [ {word:'SEE', emoji:'👀'}, {word:'LOOK', emoji:'🔭'}, {word:'HERE', emoji:'👇'}, {word:'THERE', emoji:'👉'}, {word:'PLAY', emoji:'🛝'}, {word:'THE', emoji:'👉'}, {word:'AND', emoji:'➕'}, {word:'YOU', emoji:'🫵'}, {word:'IS', emoji:'🟰'}, {word:'GO', emoji:'🟢'}, {word:'WE', emoji:'👥'}, {word:'MY', emoji:'🙋'}, {word:'ME', emoji:'🙋‍♂️'}, {word:'BIG', emoji:'🐘'}, {word:'CAN', emoji:'🥫'}, {word:'NOT', emoji:'🚫'}, {word:'RED', emoji:'🟥'}, {word:'BLUE', emoji:'🟦'}, {word:'RUN', emoji:'🏃'}, {word:'HELP', emoji:'🆘'}, {word:'MAKE', emoji:'🔨'}, {word:'FIND', emoji:'🔎'}, {word:'JUMP', emoji:'🦘'}, {word:'AWAY', emoji:'💨'}, {word:'DOWN', emoji:'⬇️'}, {word:'COME', emoji:'👋'}, {word:'TWO', emoji:'2️⃣'}, {word:'FUNNY', emoji:'😂'}, {word:'WHERE', emoji:'🗺️'}, {word:'LITTLE', emoji:'🤏'} ],
+  // 3. CONSONANT BLENDS
+  3: [ {word:'FROG', emoji:'🐸'}, {word:'CRAB', emoji:'🦀'}, {word:'DRUM', emoji:'🥁'}, {word:'FLAG', emoji:'🚩'}, {word:'SLIP', emoji:'🛼'}, {word:'STOP', emoji:'🛑'}, {word:'SWIM', emoji:'🏊'}, {word:'PLUG', emoji:'🔌'}, {word:'TWIN', emoji:'👯'}, {word:'HAND', emoji:'✋'}, {word:'JUMP', emoji:'🦘'}, {word:'TENT', emoji:'⛺'}, {word:'NEST', emoji:'🪹'}, {word:'MILK', emoji:'🥛'}, {word:'BELT', emoji:'🥋'}, {word:'LAMP', emoji:'💡'}, {word:'MASK', emoji:'🎭'}, {word:'PINK', emoji:'🌸'}, {word:'WOLF', emoji:'🐺'}, {word:'GOLF', emoji:'⛳'}, {word:'DESK', emoji:'🏫'}, {word:'VEST', emoji:'🦺'}, {word:'GIFT', emoji:'🎁'}, {word:'LIFT', emoji:'🏋️'}, {word:'CAMP', emoji:'🏕️'}, {word:'SLED', emoji:'🛷'}, {word:'DROP', emoji:'💧'}, {word:'SPOT', emoji:'⚫'}, {word:'SPIN', emoji:'💫'}, {word:'GRIN', emoji:'😁'} ],
+  // 4. 1ST GRADE SIGHT WORDS
+  4: [ {word:'OF', emoji:'🔗'}, {word:'HIS', emoji:'👨'}, {word:'HER', emoji:'👩'}, {word:'HIM', emoji:'👦'}, {word:'HAD', emoji:'🔙'}, {word:'SOME', emoji:'🔢'}, {word:'AS', emoji:'⚖️'}, {word:'THEN', emoji:'➡️'}, {word:'COULD', emoji:'🤔'}, {word:'WHEN', emoji:'⌚'}, {word:'WERE', emoji:'👥'}, {word:'THEM', emoji:'👨‍👩‍👧'}, {word:'ASK', emoji:'🙋'}, {word:'AN', emoji:'🍎'}, {word:'OVER', emoji:'🌈'}, {word:'JUST', emoji:'🤏'}, {word:'FROM', emoji:'📦'}, {word:'ANY', emoji:'🤷'}, {word:'HOW', emoji:'❓'}, {word:'KNOW', emoji:'🧠'}, {word:'PUT', emoji:'⬇️'}, {word:'TAKE', emoji:'🤲'}, {word:'EVERY', emoji:'🌎'}, {word:'OLD', emoji:'👴'}, {word:'BY', emoji:'👋'}, {word:'OPEN', emoji:'🔓'}, {word:'ROUND', emoji:'🔵'}, {word:'GIVE', emoji:'🎁'}, {word:'ONCE', emoji:'1️⃣'}, {word:'STOP', emoji:'🛑'} ],
+  // 5. MAGIC E
+  5: [ {word:'CAKE', emoji:'🎂'}, {word:'BIKE', emoji:'🚲'}, {word:'KITE', emoji:'🪁'}, {word:'BONE', emoji:'🦴'}, {word:'CUBE', emoji:'🧊'}, {word:'TUBE', emoji:'🧪'}, {word:'ROSE', emoji:'🌹'}, {word:'NOSE', emoji:'👃'}, {word:'FIRE', emoji:'🔥'}, {word:'GATE', emoji:'⛩️'}, {word:'WAVE', emoji:'🌊'}, {word:'TAPE', emoji:'📼'}, {word:'VINE', emoji:'🌿'}, {word:'RICE', emoji:'🍚'}, {word:'LIME', emoji:'🍈'}, {word:'FIVE', emoji:'5️⃣'}, {word:'NINE', emoji:'9️⃣'}, {word:'HOME', emoji:'🏠'}, {word:'HOLE', emoji:'🕳️'}, {word:'POLE', emoji:'💈'}, {word:'MULE', emoji:'🫏'}, {word:'FUME', emoji:'😤'}, {word:'BASE', emoji:'⚾'}, {word:'CASE', emoji:'💼'}, {word:'GAME', emoji:'🎮'}, {word:'NAME', emoji:'📛'}, {word:'SAME', emoji:'👯'}, {word:'TIME', emoji:'⌚'}, {word:'NOTE', emoji:'📝'}, {word:'VOTE', emoji:'🗳️'} ],
+  // 6. VOWEL TEAMS
+  6: [ {word:'RAIN', emoji:'🌧️'}, {word:'WAIT', emoji:'✋'}, {word:'TAIL', emoji:'🐕'}, {word:'MAIL', emoji:'📫'}, {word:'SAIL', emoji:'⛵'}, {word:'DAY', emoji:'☀️'}, {word:'SAY', emoji:'🗣️'}, {word:'PLAY', emoji:'🛝'}, {word:'HAY', emoji:'🌾'}, {word:'PAY', emoji:'💰'}, {word:'EAT', emoji:'🍽️'}, {word:'TEAM', emoji:'⚽'}, {word:'LEAF', emoji:'🍃'}, {word:'READ', emoji:'📚'}, {word:'SEA', emoji:'🌊'}, {word:'BEE', emoji:'🐝'}, {word:'SEE', emoji:'👀'}, {word:'TREE', emoji:'🌳'}, {word:'FEET', emoji:'👣'}, {word:'GREEN', emoji:'🟩'}, {word:'BOAT', emoji:'🚤'}, {word:'COAT', emoji:'🧥'}, {word:'GOAT', emoji:'🐐'}, {word:'ROAD', emoji:'🛣️'}, {word:'SOAP', emoji:'🧼'}, {word:'TOAST', emoji:'🍞'}, {word:'COACH', emoji:'👟'}, {word:'SHEEP', emoji:'🐑'}, {word:'SLEEP', emoji:'😴'}, {word:'TEETH', emoji:'🦷'} ],
+  // 7. BOSSY R
+  7: [ {word:'CAR', emoji:'🚗'}, {word:'JAR', emoji:'🫙'}, {word:'STAR', emoji:'⭐'}, {word:'FAR', emoji:'🔭'}, {word:'PARK', emoji:'🌳'}, {word:'FARM', emoji:'🚜'}, {word:'BARN', emoji:'🏚️'}, {word:'SHARK', emoji:'🦈'}, {word:'DARK', emoji:'🌑'}, {word:'ART', emoji:'🎨'}, {word:'CORN', emoji:'🌽'}, {word:'FORK', emoji:'🍴'}, {word:'HORN', emoji:'🎺'}, {word:'STORM', emoji:'⛈️'}, {word:'BORN', emoji:'👶'}, {word:'BIRD', emoji:'🐦'}, {word:'GIRL', emoji:'👧'}, {word:'DIRT', emoji:'🪴'}, {word:'SHIRT', emoji:'👕'}, {word:'SKIRT', emoji:'👗'}, {word:'TURTLE', emoji:'🐢'}, {word:'PURPLE', emoji:'🟣'}, {word:'NURSE', emoji:'👩‍⚕️'}, {word:'SURF', emoji:'🏄'}, {word:'BURN', emoji:'🔥'}, {word:'TIGER', emoji:'🐯'}, {word:'WATER', emoji:'💧'}, {word:'PAPER', emoji:'📄'}, {word:'FLOWER', emoji:'🌸'}, {word:'HAMMER', emoji:'🔨'} ],
+  // 8. DIPHTHONGS
+  8: [ {word:'COW', emoji:'🐮'}, {word:'OWL', emoji:'🦉'}, {word:'DOWN', emoji:'⬇️'}, {word:'TOWN', emoji:'🏙️'}, {word:'CLOWN', emoji:'🤡'}, {word:'MOUSE', emoji:'🐭'}, {word:'HOUSE', emoji:'🏠'}, {word:'CLOUD', emoji:'☁️'}, {word:'LOUD', emoji:'🔊'}, {word:'MOUTH', emoji:'👄'}, {word:'COIN', emoji:'🪙'}, {word:'BOIL', emoji:'🍲'}, {word:'SOIL', emoji:'🌱'}, {word:'OIL', emoji:'🛢️'}, {word:'POINT', emoji:'point'}, {word:'BOY', emoji:'👦'}, {word:'TOY', emoji:'🧸'}, {word:'JOY', emoji:'😂'}, {word:'ROYAL', emoji:'👑'}, {word:'COUNT', emoji:'🔢'}, {word:'SOUND', emoji:'🔊'}, {word:'ROUND', emoji:'⚪'}, {word:'FOUND', emoji:'🔍'}, {word:'GROUND', emoji:'🌱'}, {word:'SHOUT', emoji:'🗣️'}, {word:'CROWN', emoji:'👑'}, {word:'BROWN', emoji:'🟫'}, {word:'GOWN', emoji:'👗'}, {word:'GROWL', emoji:'🐕'}, {word:'FROWN', emoji:'☹️'} ],
+  // 9. 2ND GRADE SIGHT WORDS
+  9: [ {word:'ALWAYS', emoji:'♾️'}, {word:'AROUND', emoji:'🔄'}, {word:'BECAUSE', emoji:'💁'}, {word:'BEEN', emoji:'🔙'}, {word:'BEFORE', emoji:'⏮️'}, {word:'BEST', emoji:'🏆'}, {word:'BOTH', emoji:'✌️'}, {word:'BUY', emoji:'🛍️'}, {word:'CALL', emoji:'📞'}, {word:'COLD', emoji:'🥶'}, {word:'DOES', emoji:'❓'}, {word:'FAST', emoji:'⏩'}, {word:'FIRST', emoji:'🥇'}, {word:'FIVE', emoji:'5️⃣'}, {word:'FOUND', emoji:'🔍'}, {word:'GAVE', emoji:'🎁'}, {word:'GOES', emoji:'🚶'}, {word:'GREEN', emoji:'🟩'}, {word:'MADE', emoji:'🔨'}, {word:'MANY', emoji:'🔢'}, {word:'OFF', emoji:'📴'}, {word:'PULL', emoji:'🪢'}, {word:'READ', emoji:'📖'}, {word:'RIGHT', emoji:'➡️'}, {word:'SING', emoji:'🎤'}, {word:'SIT', emoji:'🪑'}, {word:'SLEEP', emoji:'😴'}, {word:'TELL', emoji:'🗣️'}, {word:'THEIR', emoji:'👪'}, {word:'THESE', emoji:'👉'}, {word:'THOSE', emoji:'👉'}, {word:'UPON', emoji:'📖'}, {word:'USE', emoji:'🔨'}, {word:'VERY', emoji:'❗️'}, {word:'WASH', emoji:'🧼'}, {word:'WHICH', emoji:'❓'}, {word:'WHY', emoji:'❓'}, {word:'WISH', emoji:'🌠'}, {word:'WORK', emoji:'💼'}, {word:'WRITE', emoji:'✍️'} ],
+  // 10. COMPOUND WORDS
+  10: [ {word:'CUPCAKE', emoji:'🧁'}, {word:'SUNFISH', emoji:'🐟'}, {word:'RAINBOW', emoji:'🌈'}, {word:'NOTEBOOK', emoji:'📓'}, {word:'TOOTHBRUSH', emoji:'🪥'}, {word:'SNOWMAN', emoji:'⛄'}, {word:'JELLYFISH', emoji:'🪼'}, {word:'BUTTERFLY', emoji:'🦋'}, {word:'DRAGONFLY', emoji:'🐉'}, {word:'FIREFLY', emoji:'💡'}, {word:'FOOTBALL', emoji:'🏈'}, {word:'BASEBALL', emoji:'⚾'}, {word:'BASKETBALL', emoji:'🏀'}, {word:'SUNFLOWER', emoji:'🌻'}, {word:'WATERMELON', emoji:'🍉'}, {word:'STRAWBERRY', emoji:'🍓'}, {word:'BLUEBERRY', emoji:'🫐'}, {word:'PINEAPPLE', emoji:'🍍'}, {word:'STARFISH', emoji:'⭐'}, {word:'SEAHORSE', emoji:'🐴'}, {word:'POPCORN', emoji:'🍿'}, {word:'PANCAKE', emoji:'🥞'}, {word:'BACKPACK', emoji:'🎒'}, {word:'AIRPLANE', emoji:'✈️'}, {word:'SPACESHIP', emoji:'🚀'}, {word:'LIGHTHOUSE', emoji:'🚨'}, {word:'SANDCASTLE', emoji:'🏰'}, {word:'SUNGLASSES', emoji:'😎'}, {word:'NEWSPAPER', emoji:'📰'}, {word:'MAILBOX', emoji:'📬'} ]
 };
 
 const GLOVE_DATA = {
@@ -260,7 +278,7 @@ const GLOVE_DATA = {
     'training': { name: 'Karate', emoji: '🥋', price: 15, perk: 'Earns Extra XP!' },
     'sparkle': { name: 'Sparkle', emoji: '✨', price: 40, perk: 'Earns Extra Coins!' },
     'robot': { name: 'Robo-Grip', emoji: '🦾', price: 10, perk: 'Visual Effect' },
-    'zombie': { name: 'Zombie', emoji: '🧟', price: 10, perk: 'Ooze Effect' },
+    'zombie': { name: 'Zombie', emoji: '🧟', price: 10, perk: 'Visual Effect' },
     'alien': { name: 'Alien', emoji: '👽', price: 10, perk: 'Visual Effect' },
     'princess': { name: 'Royal Wave', emoji: '👋', price: 20, perk: 'Visual Effect' },
     'skeleton': { name: 'Bone Hand', emoji: '💀', price: 15, perk: 'Visual Effect' },
@@ -316,13 +334,13 @@ let currentWord=null, userAnswer=[];
 let isAnimating = false; 
 let coinRushCounter = store.coinRushCounter || 0;
 let currentWordFailed = false;
-let roundWins = store.roundWins || 0; 
+let roundWins = store.roundWins || 0;
 let isBossRound = false;
 const COIN_RUSH_DURATION = 15;
 const COIN_RUSH_MULTIPLIER = 5;
 
 // Sounds
-const correctSound = new Audio('https://s3.amazonaws.com/iamlab/audio/chime_success.mp3'); 
+const correctSound = new Audio('https://s3.amazonaws.com/iamlab/audio/chime_success.mp3');
 const wrongSound = new Audio('https://s3.amazonaws.com/iamlab/audio/buzz_fail.mp3');
 const punchSound = new Audio('https://s3.amazonaws.com/iamlab/audio/punch_impact.mp3');
 const levelUpSound = new Audio('https://s3.amazonaws.com/iamlab/audio/level_up_fanfare.mp3');
@@ -367,39 +385,27 @@ function shuffle(a){ return a.slice().sort(()=>0.5-Math.random()); }
 
 // --- NEW VOICE SETUP ---
 let availableVoices = [];
-
-// Force browser to load voices immediately (Fixes the "robotic default" issue)
 window.speechSynthesis.onvoiceschanged = () => {
     availableVoices = window.speechSynthesis.getVoices();
 };
 
 function playSpeech(text){ 
   try{ 
-    // 1. Stop any previous talking immediately
     window.speechSynthesis.cancel(); 
-    
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US'; 
-    
-    // ** NEW SETTINGS FOR CLARITY **
-    u.rate = 0.9;   // Clear speed (not too fast, not too slow)
-    u.pitch = 1.0;  // Natural pitch (Removes the digital squeak)
-    u.volume = 1.0; 
-
-    // 2. Load voices if they haven't loaded yet
+    u.rate = 0.9;
+    u.pitch = 1.0;
+    u.volume = 1.0;
     if (availableVoices.length === 0) {
         availableVoices = window.speechSynthesis.getVoices();
     }
-
-    // 3. Find the best "Human-sounding" voice available
-    const bestVoice = availableVoices.find(v => v.name.includes("Google US English")) // Best on Chrome
-                   || availableVoices.find(v => v.name.includes("Samantha"))          // Best on Mac/iPad
-                   || availableVoices.find(v => v.name.includes("Microsoft Zira"))    // Best on Windows
+    const bestVoice = availableVoices.find(v => v.name.includes("Google US English")) 
+                   || availableVoices.find(v => v.name.includes("Samantha"))          
+                   || availableVoices.find(v => v.name.includes("Microsoft Zira"))    
                    || availableVoices.find(v => v.lang === 'en-US');                  
-    
     if (bestVoice) u.voice = bestVoice;
-
-    window.speechSynthesis.speak(u); 
+    window.speechSynthesis.speak(u);
   } catch(e){console.warn(e);} 
 }
 
@@ -501,7 +507,8 @@ const VictoryScene = {
         const gloveMat = new THREE.MeshPhongMaterial({ color: 0xcc0000, shininess: 100 });
         const shortsMat = new THREE.MeshLambertMaterial({ color: 0x0033cc });
         const torso = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), skinMat);
-        torso.position.y = 2.2; torso.castShadow = true; group.add(torso);
+        torso.position.y = 2.2;
+        torso.castShadow = true; group.add(torso);
         const shorts = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.8, 0.65), shortsMat);
         shorts.position.y = 1.4; shorts.castShadow = true; group.add(shorts);
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.5), skinMat);
@@ -601,7 +608,8 @@ const VictoryScene = {
                 this.triggerPunch(seq.hand);
                 this.createExplosion(new THREE.Vector3(seq.pos, 2.5, 2));
                 const box = this.letterBoxes[this.letterBoxes.length-1];
-                if(box) { box.scale.set(1.5, 1.5, 1.5); box.userData.rotVelocity.set((Math.random()-0.5)*5, (Math.random()-0.5)*5, 0); }
+                if(box) { box.scale.set(1.5, 1.5, 1.5); box.userData.rotVelocity.set((Math.random()-0.5)*5, (Math.random()-0.5)*5, 0);
+                }
                 if(seq.finish) { 
                     this.createConfetti();
                     this.boxer.leftArm.rotation.set(0, 0, 2.9);
@@ -618,7 +626,8 @@ const VictoryScene = {
             this.boxer.mesh.userData.punchTime += delta * 8;
             const pt = this.boxer.mesh.userData.punchTime;
             const val = Math.sin(Math.min(pt, Math.PI));
-            const arm = hand==='left' ? this.boxer.leftArm : this.boxer.rightArm;
+            const arm = hand==='left' ?
+            this.boxer.leftArm : this.boxer.rightArm;
             const fore = hand==='left' ? this.boxer.leftForeArm : this.boxer.rightForeArm;
             arm.rotation.x = 0.78 - (val * 1.5);
             fore.rotation.x = 2.09 - (val * 1.5);
@@ -649,11 +658,11 @@ function pickWord() {
 
     // Normal Game Loop
     isBossRound = false;
-    document.body.classList.remove('boss-mode'); // Safety cleanup
+    document.body.classList.remove('boss-mode');
+    // Safety cleanup
 
     const set = WORD_SETS[levelChoice] || WORD_SETS[1];
     const bagKey = `sb_wordBag_lvl_${levelChoice}`;
-    
     // Bag Logic (Same as before)
     let bag = JSON.parse(localStorage.getItem(bagKey) || '[]');
     if (bag.length === 0 || bag.some(i => i >= set.length)) {
@@ -669,26 +678,23 @@ function pickWord() {
     
     renderWord();
     // *** NEW: Update Background Theme ***
-    document.body.className = `lvl-${levelChoice}`; 
+    document.body.className = `lvl-${levelChoice}`;
     // ************************************
 }
 
 // *** NEW FUNCTION: Sets up the Boss Fight ***
 function startBossRound() {
     isBossRound = true;
-    
     // 1. Visuals & Audio
     document.body.classList.add('boss-mode');
     playSpeech("Warning! End of Level!");
-    flashFeedback("⚠️ BOSS WORD! ⚠️");
-    
+    flashFeedback(" BOSS WORD! ");
     // 2. Pick a Harder Word (From next level up, or just a hard one)
-    let bossLevel = Math.min(levelChoice + 1, 5);
+    let bossLevel = Math.min(levelChoice + 1, 10);
     const set = WORD_SETS[bossLevel];
     
     // Pick random word from harder set (Don't use bag, just random challenge)
     const data = set[Math.floor(Math.random() * set.length)];
-    
     currentWord = data.word.toUpperCase();
     el.puzzleImage.textContent = data.emoji;
     
@@ -704,7 +710,6 @@ function renderWord(){
   // Add extra letters for difficulty
   const extras='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').sort(()=>0.5-Math.random()).slice(0,Math.max(0,Math.min(3,Math.floor(letters.length/2))));
   const tiles = shuffle([...letters,...extras]);
-
   // Render Slots (Empty Boxes)
   letters.forEach((l, i)=>{ 
     const s=document.createElement('div'); 
@@ -713,7 +718,6 @@ function renderWord(){
     s.addEventListener('click',()=>onSlotClick(s)); 
     el.slots.appendChild(s); 
   });
-
   // Render Tiles (Colored Letters)
   tiles.forEach((l, i)=>{
     const t=document.createElement('div'); 
@@ -730,7 +734,6 @@ function renderWord(){
     t.addEventListener('click',()=>{ onTileClick(t); playSpeech(t.dataset.letter.toLowerCase()); });
     el.tiles.appendChild(t);
   });
-
   el.feedback.textContent='';
   updateHUD();
 }
@@ -741,7 +744,7 @@ function onTileClick(tile){
   if(slotIndex === -1) { flashFeedback("Boxes are full!"); return; }
   const emptySlot = el.slots.children[slotIndex];
   emptySlot.textContent = tile.dataset.letter;
-  emptySlot.dataset.sourceId = tile.dataset.originalId; 
+  emptySlot.dataset.sourceId = tile.dataset.originalId;
   tile.style.visibility='hidden';
   userAnswer[slotIndex]=tile.dataset.letter;
 }
@@ -773,15 +776,17 @@ function submit(){
   if(isAnimating) return;
   const attempt=userAnswer.filter(l=>l).join('');
   if(attempt.length!==currentWord.length) { flashFeedback("Fill all the boxes first!"); return; }
-  if(attempt===currentWord) handleCorrect(); else handleWrong();
+  if(attempt===currentWord) handleCorrect();
+  else handleWrong();
 }
 
 function levelUp() {
-    if (typeof VictoryScene !== 'undefined') { VictoryScene.start(); } else { finishLevelUp(); }
+    if (typeof VictoryScene !== 'undefined') { VictoryScene.start(); } else { finishLevelUp();
+    }
 }
 function finishLevelUp() {
     roundWins = 0;
-    if (levelChoice < 5) {
+    if (levelChoice < 10) {
         levelChoice++;
         localStorage.setItem('wordIndex', 0);
         if(el.levelSelect) { el.levelSelect.value = levelChoice; }
@@ -799,7 +804,6 @@ function handleCorrect(){
   isAnimating = true;
   let baseXP = 5; let bonusXP = 0;
   let bonusCoins = 0; let baseScore = 10;
-  
   if (levelChoice >= 3) baseXP = 7;
   if (levelChoice >= 2) bonusCoins += 1;
   if (levelChoice >= 5) baseScore += 5;
@@ -823,20 +827,18 @@ function handleCorrect(){
   if (streak >= 5) multiplier = 1.5;
   if (streak >= 10) multiplier = 2;
   if (streak >= 20) multiplier = 4;
-
   // 2. Coin Calculation
   let baseCoinReward = 5;
   let streakBonusCoins = Math.floor(streak / 5); 
   let totalCoinsEarned = (baseCoinReward + streakBonusCoins + bonusCoins);
   
   if (rushActive) totalCoinsEarned *= COIN_RUSH_MULTIPLIER;
-
   // *** BOSS REWARD (Triple Coins) ***
   if (isBossRound) {
       totalCoinsEarned *= 3;
       flashFeedback("BOSS DEFEATED! 3x COINS!");
       playSpeech("Boss Defeated!");
-      document.body.classList.remove('boss-mode');
+      document.body.classList.remove('boss-mode'); // Turn off alarms
   }
 
   // *** NEW: CRITICAL HIT MECHANIC (10% Chance) ***
@@ -851,11 +853,11 @@ function handleCorrect(){
   } else if (!isBossRound) {
       flashFeedback("HIT!");
   }
-  // **********************************************
 
   let gained = Math.round(baseScore * multiplier);
   if (currentGlove === 'star') gained = Math.round(baseScore * (1 + (currentWord.length / 2)));
-  if (currentGlove === 'gold' && streak >= 3) { gained += 25; totalCoinsEarned += 5; }
+  if (currentGlove === 'gold' && streak >= 3) { gained += 25; totalCoinsEarned += 5;
+  }
 
   score += (gained * (rushActive ? rushMultiplier : 1));
   coins += totalCoinsEarned;
@@ -876,8 +878,7 @@ function handleCorrect(){
   
   showPunch(true,gained);
   correctSound.play().catch(() => {});
-  
-  // Only say the word if it wasn't a special glove sound (to prevent overlapping audio)
+  // Only say the word if it wasn't a special glove sound
   if(!['cat','robot','zombie','alien','princess'].includes(currentGlove)) {
       playSpeech(currentWord.toLowerCase());
   }
@@ -890,7 +891,6 @@ function handleCorrect(){
 
   saveStore(); 
   updateHUD();
-  
   if (roundWins >= 15) {
       setTimeout(() => {
           playSpeech("LEVEL UP!"); 
@@ -911,8 +911,10 @@ function handleWrong(){
         setTimeout(() => el.streak.classList.remove('streak-guard-flash'), 600);
         feedbackMessage = "GUARD! Streak Protected.";
       }
-  } else { streak = 0; }
-  if (coinRushCounter > 0) { coinRushCounter = 0; feedbackMessage = "RUSH FAILED! Streak Reset."; }
+  } else { streak = 0;
+  }
+  if (coinRushCounter > 0) { coinRushCounter = 0; feedbackMessage = "RUSH FAILED! Streak Reset.";
+  }
   
   showPunch(false,0); 
   wrongSound.play().catch(() => {});
@@ -927,41 +929,31 @@ function showPunch(hit, gained) {
     const glove = el.glove, balloon = el.puzzleImage;
     glove.classList.remove('punching');
     balloon.classList.remove('balloonHit');
-
     if (hit) {
         glove.classList.add('punching');
         balloon.classList.add('balloonHit');
         
-        // --- 1. SPECIAL GLOVE SOUNDS ---
-        // We delay the standard punch sound slightly if a special sound plays
         let delayPunch = false;
-        
         if (currentGlove === 'cat') { playSpeech("Meow!"); delayPunch = true; }
         else if (currentGlove === 'robot') { playSpeech("Beep Boop!"); delayPunch = true; }
         else if (currentGlove === 'zombie' || currentGlove === 'slime') { playSpeech("Brains..."); delayPunch = true; }
         else if (currentGlove === 'alien') { playSpeech("Zap!"); delayPunch = true; }
         else if (currentGlove === 'princess') { playSpeech("Hi!"); delayPunch = true; }
-        else {
-            // Standard punch for everyone else
-            punchSound.play().catch(() => {});
-        }
+        else { punchSound.play().catch(() => {}); }
         
-        // If we played a voice, play the punch sound very quietly or delayed
-        if(delayPunch) {
-             setTimeout(() => punchSound.play().catch(() => {}), 300);
-        }
-        // -------------------------------
+        if(delayPunch) { setTimeout(() => punchSound.play().catch(() => {}), 300); }
 
-        // --- 2. PARTICLE EFFECTS ---
         let pColors = ['#ffffff', '#ffb400'];
         let pShapes = ['square'];
-        if (currentGlove === 'fire') { pColors = ['#ff0000', '#ff4500', '#fbbf24']; pShapes = ['square']; }
-        else if (currentGlove === 'ice') { pColors = ['#a5f3fc', '#ffffff', '#0ea5e9']; pShapes = ['circle']; }
-        else if (currentGlove === 'zombie' || currentGlove === 'slime') { pColors = ['#84cc16', '#3f6212', '#bef264']; pShapes = ['circle']; }
-        else if (currentGlove === 'gold' || currentGlove === 'sparkle') { pColors = ['#FFD700', '#FDB931', '#FFFFFF']; pShapes = ['circle']; }
-        
+        if (currentGlove === 'fire') { pColors = ['#ff0000', '#ff4500', '#fbbf24']; pShapes = ['square'];
+        }
+        else if (currentGlove === 'ice') { pColors = ['#a5f3fc', '#ffffff', '#0ea5e9'];
+        pShapes = ['circle']; }
+        else if (currentGlove === 'zombie' || currentGlove === 'slime') { pColors = ['#84cc16', '#3f6212', '#bef264'];
+        pShapes = ['circle']; }
+        else if (currentGlove === 'gold' || currentGlove === 'sparkle') { pColors = ['#FFD700', '#FDB931', '#FFFFFF'];
+        pShapes = ['circle']; }
         confetti({ particleCount: 30, spread: 60, origin: { y: 0.6 }, colors: pColors, shapes: pShapes, disableForReducedMotion: true });
-        
         setTimeout(() => { glove.classList.remove('punching'); balloon.classList.remove('balloonHit'); }, 600);
     } else {
         glove.classList.add('punching');
@@ -975,7 +967,8 @@ function renderProgressModal() {
         <p>Level: <span class="font-bold text-blue-600">LVL ${levelChoice}</span></p>
         <p>XP: <span class="font-bold">${xp} / 50</span></p>
         <p>Current Streak: <span class="font-bold">${streak}</span></p>
-        ${coinRushCounter > 0 ? `<p class="text-red-500 font-bold">COIN RUSH ACTIVE: ${coinRushCounter} words left!</p>` : ''}
+        ${coinRushCounter > 0 ?
+        `<p class="text-red-500 font-bold">COIN RUSH ACTIVE: ${coinRushCounter} words left!</p>` : ''}
         <div class="text-lg font-semibold border-b pb-2 pt-4 mb-2">Lifetime Achievements</div>
         <p>Total Score Earned: <span class="font-bold">${score}</span></p>
         <p>Max Streak: <span class="font-bold">${maxStreak}</span></p>
@@ -987,9 +980,9 @@ function renderProgressModal() {
 function renderShop() {
     // 1. Theme the Modal Window (Magical Night Look)
     const modalBox = el.shopContent.parentElement;
-    modalBox.style.background = 'linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%)'; // Deep Indigo to Dark Slate
-    modalBox.style.border = '4px solid #4f46e5'; // Indigo Border
-    modalBox.style.boxShadow = '0 0 40px rgba(79, 70, 229, 0.4)'; // Glow
+    modalBox.style.background = 'linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%)'; 
+    modalBox.style.border = '4px solid #4f46e5'; 
+    modalBox.style.boxShadow = '0 0 40px rgba(79, 70, 229, 0.4)'; 
     modalBox.style.color = 'white';
 
     // 2. Render Tabs & Content
@@ -1022,13 +1015,11 @@ function renderGloves(container) {
         const owned = ownedGloves.includes(id);
         const equipped = currentGlove === id;
         
-        // Dynamic Button Colors
         let btnStr = owned ? (equipped ? "EQUIPPED" : "EQUIP") : `BUY ${data.price}💰`;
         let btnCls = owned ? 
             (equipped ? "bg-green-500 text-white ring-2 ring-green-300" : "bg-indigo-600 hover:bg-indigo-500 text-white") : 
             (coins >= data.price ? "bg-yellow-400 hover:bg-yellow-300 text-black shadow-[0_4px_0_rgb(180,83,9)] active:translate-y-1 active:shadow-none" : "bg-gray-700 text-gray-500 cursor-not-allowed");
             
-        // Glassmorphism Card Style
         return `
         <div class="bg-white/5 backdrop-blur-sm p-4 rounded-2xl flex flex-col items-center border-2 ${owned ? 'border-indigo-500/50' : 'border-white/10'} hover:border-yellow-400/50 hover:bg-white/10 transition-all duration-200 group">
             <div class="text-6xl mb-3 drop-shadow-lg transform group-hover:scale-110 transition-transform duration-200">${data.emoji}</div>
@@ -1095,7 +1086,6 @@ window.handleShopAction = (gloveId, price, isOwned) => {
         updateHUD(); saveStore(); renderShop();
     } else { playSpeech("Not enough coins!"); }
 };
-
 document.addEventListener('keydown', e=>{
   if (isAnimating) return;
   if(e.key==='Backspace'){ 
@@ -1111,7 +1101,6 @@ document.addEventListener('keydown', e=>{
     if(tile) { onTileClick(tile); playSpeech(letter.toLowerCase()); }
   }
 });
-
 el.emojiBtn.addEventListener('click',()=>playSpeech(currentWord.toLowerCase()));
 el.submit.addEventListener('click',submit);
 el.newBtn.addEventListener('click',pickWord);
@@ -1129,21 +1118,26 @@ el.themeToggle.addEventListener('click', () => {
 el.levelSelect.value=levelChoice;
 el.levelSelect.addEventListener('change',e=>{ levelChoice=parseInt(e.target.value); localStorage.setItem('sb_level',levelChoice); localStorage.setItem('wordIndex', 0); pickWord(); });
 
-function flashFeedback(t){ el.feedback.textContent=t; setTimeout(()=>{ if(el.feedback.textContent===t) el.feedback.textContent=''; },1500); }
-function saveStore(){ localStorage.setItem('spellingBalloon_v2',JSON.stringify({ coins, score, xp, streak, maxStreak, wordsSpelled, currentGlove, ownedGloves, levelChoice, coinRushCounter, roundWins, ownedStickers, placedStickers })); }
+function flashFeedback(t){ el.feedback.textContent=t; setTimeout(()=>{ if(el.feedback.textContent===t) el.feedback.textContent=''; },1500);
+}
+function saveStore(){ localStorage.setItem('spellingBalloon_v2',JSON.stringify({ coins, score, xp, streak, maxStreak, wordsSpelled, currentGlove, ownedGloves, levelChoice, coinRushCounter, roundWins, ownedStickers, placedStickers }));
+}
 function updateHUD(){ 
   const xpNextGoal = 50;
   el.score.textContent=`Score: ${score}`; el.coins.textContent=coins; el.xp.textContent=xp; el.xpNext.textContent=xpNextGoal; el.streak.textContent=streak; el.glove.textContent = GLOVE_DATA[currentGlove].emoji;
   if(el.levelDisplay) el.levelDisplay.textContent = `LVL ${levelChoice}`;
-  if (levelChoice >= 2) { el.coins.classList.add('gold-boost'); } else { el.coins.classList.remove('gold-boost'); }
+  if (levelChoice >= 2) { el.coins.classList.add('gold-boost'); } else { el.coins.classList.remove('gold-boost');
+  }
   if (levelChoice >= 4) { el.streak.classList.add('streak-guard'); } else { el.streak.classList.remove('streak-guard'); }
   const maxCombo = 20;
   const percentage = Math.min((streak / maxCombo) * 100, 100);
   const bar = document.getElementById('streakBar');
   if(bar) { 
       bar.style.width = percentage + '%';
-      if (streak >= 10) { bar.classList.add('animate-pulse'); bar.parentElement.style.boxShadow = '0 0 15px #ff4500'; bar.parentElement.style.borderColor = '#ff4500'; } 
-      else { bar.classList.remove('animate-pulse'); bar.parentElement.style.boxShadow = 'none'; bar.parentElement.style.borderColor = '#4b5563'; }
+      if (streak >= 10) { bar.classList.add('animate-pulse');
+      bar.parentElement.style.boxShadow = '0 0 15px #ff4500'; bar.parentElement.style.borderColor = '#ff4500'; } 
+      else { bar.classList.remove('animate-pulse');
+      bar.parentElement.style.boxShadow = 'none'; bar.parentElement.style.borderColor = '#4b5563'; }
   }
 }
 
@@ -1151,17 +1145,20 @@ function updateHUD(){
 if(el.stickerBtn) el.stickerBtn.addEventListener('click', openStickerBook);
 if(el.closeStickerModal) el.closeStickerModal.addEventListener('click', () => { el.stickerModal.style.display = 'none'; });
 let selectedStickerIndex = null;
-function openStickerBook() { el.stickerModal.style.display = 'flex'; renderStickerDrawer(); renderPlacedStickers(); }
+function openStickerBook() { el.stickerModal.style.display = 'flex'; renderStickerDrawer();
+renderPlacedStickers(); }
 function renderStickerDrawer() {
     const drawer = el.stickerDrawer;
-    if (ownedStickers.length === 0) { drawer.innerHTML = '<div class="w-full text-center text-gray-500 font-bold text-xl">Go to Shop to buy stickers!</div>'; return; }
+    if (ownedStickers.length === 0) { drawer.innerHTML = '<div class="w-full text-center text-gray-500 font-bold text-xl">Go to Shop to buy stickers!</div>'; return;
+    }
     drawer.innerHTML = ownedStickers.map(id => `
         <div class="min-w-[80px] h-[80px] bg-white/10 rounded-xl flex items-center justify-center text-5xl cursor-pointer hover:bg-white/20 hover:scale-110 transition shadow-lg border-2 border-white/5 active:scale-95" onclick="placeSticker('${id}')">${STICKER_DATA[id].emoji}</div>
     `).join('');
 }
 window.buySticker = (id) => {
     const data = STICKER_DATA[id];
-    if(coins >= data.price && !ownedStickers.includes(id)) { coins -= data.price; ownedStickers.push(id); playSpeech("New Sticker!"); saveStore(); updateHUD(); renderShop(); } 
+    if(coins >= data.price && !ownedStickers.includes(id)) { coins -= data.price; ownedStickers.push(id); playSpeech("New Sticker!"); saveStore(); updateHUD(); renderShop();
+    } 
     else if (ownedStickers.includes(id)) { playSpeech("You own this!"); } else { playSpeech("Not enough coins"); }
 };
 window.placeSticker = (id) => {
@@ -1169,13 +1166,14 @@ window.placeSticker = (id) => {
     const alreadyExists = placedStickers.some(s => s.id === id);
     
     if (alreadyExists) {
-        playSpeech("Already here!"); // Feedback
-        
+        playSpeech("Already here!");
+        // Feedback
         // Optional: Find it and shake it/highlight it so they see it
         const index = placedStickers.findIndex(s => s.id === id);
         selectedStickerIndex = index; // Auto-select the existing one
         renderPlacedStickers(); 
-        return; // STOP here. Do not create a new one.
+        return; // STOP here.
+        // Do not create a new one.
     }
 
     // 2. If not found, create it (The original code)
@@ -1186,7 +1184,6 @@ window.placeSticker = (id) => {
         y: 40 + (Math.random() * 20), 
         size: 5 
     });
-    
     playSpeech("Pop!"); 
     saveStore(); 
     renderPlacedStickers();
@@ -1196,7 +1193,6 @@ function renderPlacedStickers() {
     // Clear old items (keep grid and controls)
     const oldItems = canvas.querySelectorAll('.sticker-item, #stickerControls');
     oldItems.forEach(e => e.remove());
-
     // --- TOOLBAR LOGIC ---
     if(selectedStickerIndex !== null) {
         const bar = document.createElement('div');
@@ -1222,6 +1218,7 @@ function renderPlacedStickers() {
         d.style.top = s.y + '%';
         d.style.fontSize = s.size + 'rem';
         d.style.zIndex = index + 10;
+     
         d.style.transform = 'translate(-50%, -50%)';
         
         // Highlight selection
@@ -1230,6 +1227,7 @@ function renderPlacedStickers() {
             d.style.backgroundColor = 'rgba(255,255,255,0.1)';
             d.style.borderRadius = '12px';
             d.style.zIndex = 50; 
+      
         }
 
         // Touch/Click to Select
@@ -1240,11 +1238,14 @@ function renderPlacedStickers() {
     });
 }
 window.modSticker = (action) => {
-    if(action === 'close') { selectedStickerIndex = null; renderPlacedStickers(); return; }
+    if(action === 'close') { selectedStickerIndex = null; renderPlacedStickers(); return;
+    }
     if(selectedStickerIndex === null) return;
     const s = placedStickers[selectedStickerIndex];
-    if(action === 'grow') { s.size = Math.min(s.size+1, 12); playSpeech("Big"); }
-    if(action === 'shrink') { s.size = Math.max(s.size-1, 2); playSpeech("Small"); }
+    if(action === 'grow') { s.size = Math.min(s.size+1, 12);
+    playSpeech("Big"); }
+    if(action === 'shrink') { s.size = Math.max(s.size-1, 2); playSpeech("Small");
+    }
     if(action === 'del') { placedStickers.splice(selectedStickerIndex, 1); selectedStickerIndex = null; playSpeech("Deleted"); }
     saveStore(); renderPlacedStickers();
 };
@@ -1263,10 +1264,31 @@ function startDrag(e, index) {
         placedStickers[dragIdx].x = newX; placedStickers[dragIdx].y = newY;
         renderPlacedStickers();
     };
-    const upHandler = () => { dragIdx = null; saveStore(); document.removeEventListener('mousemove', moveHandler); document.removeEventListener('mouseup', upHandler); document.removeEventListener('touchmove', moveHandler); document.removeEventListener('touchend', upHandler); };
+    const upHandler = () => { dragIdx = null; saveStore(); document.removeEventListener('mousemove', moveHandler);
+    document.removeEventListener('mouseup', upHandler); document.removeEventListener('touchmove', moveHandler); document.removeEventListener('touchend', upHandler); };
     document.addEventListener('mousemove', moveHandler); document.addEventListener('mouseup', upHandler); document.addEventListener('touchmove', moveHandler, { passive: false }); document.addEventListener('touchend', upHandler);
 }
-if(el.stickerCanvas) { el.stickerCanvas.addEventListener('mousedown', (e) => { if(e.target === el.stickerCanvas || e.target.classList.contains('absolute')) { selectedStickerIndex = null; renderPlacedStickers(); } }); el.stickerCanvas.addEventListener('touchstart', (e) => { if(e.target === el.stickerCanvas || e.target.classList.contains('absolute')) { selectedStickerIndex = null; renderPlacedStickers(); } }); }
+if(el.stickerCanvas) { el.stickerCanvas.addEventListener('mousedown', (e) => { if(e.target === el.stickerCanvas || e.target.classList.contains('absolute')) { selectedStickerIndex = null; renderPlacedStickers(); } });
+    el.stickerCanvas.addEventListener('touchstart', (e) => { if(e.target === el.stickerCanvas || e.target.classList.contains('absolute')) { selectedStickerIndex = null; renderPlacedStickers(); } });
+}
+
+// Hint Logic
+const hintBtn = document.getElementById('hintBtn');
+if(hintBtn) {
+    hintBtn.addEventListener('click', () => {
+        if(coins < 20) { playSpeech("Need more coins!"); flashFeedback("Need 20 Coins!"); return; }
+        const slotIndex = userAnswer.findIndex(l => l === null);
+        if(slotIndex === -1) { flashFeedback("Full!"); return; }
+        const targetLetter = currentWord[slotIndex];
+        const tile = Array.from(el.tiles.children).find(t => t.dataset.letter === targetLetter && t.style.visibility !== 'hidden');
+        if(tile) {
+            coins -= 20; saveStore(); updateHUD();
+            onTileClick(tile); playSpeech("Hint used!");
+            const slot = el.slots.children[slotIndex];
+            slot.style.borderColor = '#3b82f6'; setTimeout(() => slot.style.borderColor = '', 500);
+        }
+    });
+}
 
 // Init
 document.body.setAttribute('data-theme', localStorage.getItem('sb_theme') || 'dark');
@@ -1302,17 +1324,20 @@ if (lootOverlay && lootCrate && collectBtn) {
     });
 }
 function triggerLootBox() {
-    if (!lootOverlay || !lootCrate) { if(typeof finishLevelUp === 'function') finishLevelUp(); return; }
+    if (!lootOverlay || !lootCrate) { if(typeof finishLevelUp === 'function') finishLevelUp(); return;
+    }
     lootOverlay.classList.remove('hidden'); lootOverlay.classList.add('flex');
     crateClicks = 0; lootCrate.style.display = 'block'; lootRewards.classList.add('hidden'); lootRewards.classList.remove('flex');
     lootCrate.textContent = '📦'; lootCrate.classList.remove('crate-shake');
-    lootCrate.classList.remove('crate-drop'); void lootCrate.offsetWidth; lootCrate.classList.add('crate-drop');
+    lootCrate.classList.remove('crate-drop');
+    void lootCrate.offsetWidth; lootCrate.classList.add('crate-drop');
     playSpeech("Loot Crate!");
 }
 function openCrate() {
     lootCrate.style.display = 'none'; lootRewards.classList.remove('hidden'); lootRewards.classList.add('flex');
     playSpeech("Jackpot!");
-    if(typeof confetti === 'function') { confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } }); }
+    if(typeof confetti === 'function') { confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+    }
     let rewardsHTML = '';
     for(let i=0; i<3; i++) {
         const isCoin = Math.random() > 0.5;
@@ -1328,14 +1353,15 @@ function openCrate() {
                     ownedStickers.push(randId);
                     rewardsHTML += `<div class="bg-slate-800 p-4 rounded-xl border-2 border-purple-500 text-center w-24"><div class="text-4xl">${sticker.emoji}</div><div class="text-white font-bold text-sm">NEW!</div></div>`;
                 } else {
-                    coins += 25; rewardsHTML += `<div class="bg-slate-800 p-4 rounded-xl border-2 border-gray-500 text-center w-24"><div class="text-4xl">💰</div><div class="text-white font-bold text-sm">+25</div></div>`;
+                    coins += 25;
+                    rewardsHTML += `<div class="bg-slate-800 p-4 rounded-xl border-2 border-gray-500 text-center w-24"><div class="text-4xl">💰</div><div class="text-white font-bold text-sm">+25</div></div>`;
                 }
             }
         }
     }
-    lootItems.innerHTML = rewardsHTML; saveStore(); updateHUD();
+    lootItems.innerHTML = rewardsHTML;
+    saveStore(); updateHUD();
 }
-
 </script>
 </body>
 </html>
