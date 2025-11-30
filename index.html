@@ -6,121 +6,131 @@
 <title>Spelling K.O. — The Spelling Gauntlet</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
-/* --- THEME COLORS --- */
-:root {
-    /* Day Mode (Light - Default) */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f0f0f0;
-    --text-primary: #333333;
-    --card-bg: #e0e0e0;
-    --accent: #ffb400;
-}
-[data-theme="dark"] {
-    /* Night Mode (Dark) */
-    --bg-primary: #0b1220;
-    --bg-secondary: #071022;
-    --text-primary: #ffffff;
-    --card-bg: linear-gradient(180deg,#0f1724,#071022);
-    --accent: #ffb400;
-}
+/* Fight Font */
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+body, button, .letter, .slot { font-family: 'Russo One', sans-serif !important; letter-spacing: 1px; }
+/* Prevents zooming on buttons when tapped quickly */
+button, .letter, .slot { touch-action: manipulation; }
 
-html,body,#app{height:100%}
-body{
-    font-family:Inter, system-ui, -apple-leading, 'Segoe UI', Roboto, Arial;
-    background:var(--bg-secondary);
-    color:var(--text-primary);
-    padding:18px;
-    transition: background-color 0.3s, color 0.3s;
+/* Loot Box Animations */
+@keyframes dropIn {
+    0% { transform: translateY(-100vh) rotate(10deg); opacity: 0; }
+    60% { transform: translateY(20px) rotate(-5deg); opacity: 1; }
+    80% { transform: translateY(-10px) rotate(2deg); }
+    100% { transform: translateY(0) rotate(0); opacity: 1; }
 }
-.card{
-    background:var(--card-bg);
-    border:1px solid rgba(255,255,255,0.04);
-    transition: background 0.3s;
+.crate-drop { animation: dropIn 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+@keyframes shakeHard {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-3px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
-.letter{
-    width:64px;height:64px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;cursor:pointer;user-select:none;
-    color: var(--text-primary);
-    background-color: var(--bg-primary);
-}
-.slot{width:64px;height:64px;border-radius:12px;border:2px dashed rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center}
-.big-btn{padding:12px 18px;border-radius:12px}
-/* Renamed .balloon to .puzzle-image */
+.crate-shake { animation: shakeHard 0.2s; }
+
+/* Theme & Layout */
+:root { --bg-primary: #ffffff; --bg-secondary: #f0f0f0; --text-primary: #333333; --card-bg: #e0e0e0; --accent: #ffb400; }
+[data-theme="dark"] { --bg-primary: #0b1220; --bg-secondary: #071022; --text-primary: #ffffff; --card-bg: linear-gradient(180deg,#0f1724,#071022); --accent: #ffb400; }
+body { font-family:Inter, sans-serif; background:var(--bg-secondary); color:var(--text-primary); padding:18px; height:100%; }
+.card { background:var(--card-bg); border:1px solid rgba(255,255,255,0.04); position: relative; }
+
+/* Game Elements */
+.letter { width: 65px; height: 65px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight: 900; font-size: 32px; cursor:pointer; user-select:none; color: var(--text-primary); background-color: var(--bg-primary); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+.slot { width: 65px; height: 65px; border-radius:12px; border: 4px dashed rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size: 32px; font-weight: 900; }
+#score, #coins { font-size: 2rem; font-weight: 900; }
+
+/* Feedback Popup (Fixed Position) */
+#feedback { position: absolute; right: 5%; top: 55%; transform: translateY(-50%); width: 200px; text-align: center; font-size: 3rem; color: #ffb400; font-weight: 900; text-shadow: 3px 3px 0 #000; pointer-events: none; z-index: 50; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popIn { 0% { transform: translateY(-50%) scale(0); opacity: 0; } 80% { transform: translateY(-50%) scale(1.2); opacity: 1; } 100% { transform: translateY(-50%) scale(1); opacity: 1; } }
+
+/* Sticker & Animations */
+.sticker-item { position: absolute; cursor: grab; user-select: none; transition: transform 0.1s; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.3)); }
+.sticker-item:active { cursor: grabbing; transform: scale(1.1); }
 .puzzle-image{font-size:84px;display:inline-block;transform-origin:center bottom;}
-/* --- GLOVE POSITION: Moved left and adjusted perspective size --- */
 .glove{position:absolute; right:20%; bottom:60px; font-size:64px; transform-origin:right center; z-index:2;}
-.sparkle{position:absolute;font-size:32px;opacity:0;pointer-events:none; animation:fadeUp 0.8s forwards;}
-@keyframes fadeUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-50px) scale(1.3)}}
+.punching{animation:punchGlove 0.5s ease-out;}
+.balloonHit{animation:wobbleBalloon 0.5s ease-out;}
 @keyframes punchGlove{0%{transform:translateX(0) rotate(0deg);}50%{transform:translateX(-120px) rotate(-15deg);}80%{transform:translateX(-100px) rotate(5deg);}100%{transform:translateX(0) rotate(0deg);}}
 @keyframes wobbleBalloon{0%{transform:rotate(0deg);}25%{transform:rotate(15deg);}50%{transform:rotate(-10deg);}75%{transform:rotate(5deg);}100%{transform:rotate(0deg);}}
-.balloonHit{animation:wobbleBalloon 0.5s ease-out;}
-.punching{animation:punchGlove 0.5s ease-out;}
-.scorePop{position:absolute;font-weight:900;font-size:22px;opacity:1;transform:translateY(0);animation:popUp 900ms forwards}
-@keyframes popUp{0%{opacity:1;transform:translateY(0) scale(1)}80%{opacity:0.9;transform:translateY(-32px) scale(1.08)}100%{opacity:0;transform:translateY(-64px) scale(1.1)}}
-.shopItem{background:linear-gradient(180deg,#0b1220,#07102a);border-radius:12px;padding:10px;cursor:pointer}
-@media (max-width:640px){.letter,.slot{width:52px;height:52px;font-size:22px}.puzzle-image{font-size:64px}.glove{font-size:48px;right:0px}}
 
-/* --- FIXED: Level Select Contrast --- */
-#levelSelect {
-    background-color: #333 !important;
-    color: #ffb400 !important;
-    border: 2px solid #ffb400;
-    font-weight: bold;
+/* Utils */
+#levelSelect { background-color: #333 !important; color: #ffb400 !important; border: 2px solid #ffb400; }
+#coins.gold-boost { color: gold; text-shadow: 0 0 5px orange; }
+.streak-guard { color: #ffd700; text-shadow: 0 0 3px #ffa500; }
+.modal { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-content { background-color: white; color: #333; padding: 24px; border-radius: 12px; position: relative; max-height: 85vh; overflow-y: auto; }
+/* ... (Your other styles are up here) ... */
+
+.shake-effect {
+  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
 }
-/* --- NEW: Level Display Style --- */
-#levelDisplay {
-    display: inline-block;
-    background: #0088ff;
+
+/* *** PASTE THE NEW CODE HERE *** */
+/* BOSS MODE ANIMATIONS */
+@keyframes redAlarm {
+    0% { background-color: var(--bg-secondary); box-shadow: inset 0 0 0 0 red; }
+    50% { background-color: #3f0e0e; box-shadow: inset 0 0 100px 20px rgba(255,0,0,0.5); }
+    100% { background-color: var(--bg-secondary); box-shadow: inset 0 0 0 0 red; }
+}
+.boss-mode {
+    animation: redAlarm 1.5s infinite ease-in-out !important;
+}
+.boss-text {
+    color: #ff0000 !important;
+    text-shadow: 0 0 10px red;
+    transform: scale(1.2);
+}
+/* LEVEL THEMES */
+body.lvl-1 { background: radial-gradient(circle at center, #f0fdf4, #bbf7d0); } /* Green */
+body.lvl-2 { background: radial-gradient(circle at center, #eff6ff, #bfdbfe); } /* Blue */
+body.lvl-3 { background: radial-gradient(circle at center, #faf5ff, #e9d5ff); } /* Purple */
+body.lvl-4 { background: radial-gradient(circle at center, #fff7ed, #fed7aa); } /* Orange */
+body.lvl-5 { background: radial-gradient(circle at center, #fef2f2, #fecaca); } /* Red */
+
+/* Dark Mode Overrides for Themes */
+body[data-theme="dark"].lvl-1 { background: radial-gradient(circle at center, #052e16, #022c22); }
+body[data-theme="dark"].lvl-2 { background: radial-gradient(circle at center, #172554, #0f172a); }
+body[data-theme="dark"].lvl-3 { background: radial-gradient(circle at center, #3b0764, #2e1065); }
+body[data-theme="dark"].lvl-4 { background: radial-gradient(circle at center, #431407, #2a0a05); }
+body[data-theme="dark"].lvl-5 { background: radial-gradient(circle at center, #450a0a, #2b0808); }
+/* PHONICS COLORS */
+.letter.vowel {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important; /* Red */
+    border: 2px solid #991b1b;
     color: white;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 1rem;
-    margin-right: 12px;
+    text-shadow: 1px 1px 0 #7f1d1d;
 }
-/* --- NEW VISUAL PERKS --- */
-#coins.gold-boost {
-    color: gold;
-    text-shadow: 0 0 5px orange;
+.letter.consonant {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important; /* Blue */
+    border: 2px solid #1e40af;
+    color: white;
+    text-shadow: 1px 1px 0 #1e3a8a;
 }
-.streak-guard { /* LVL 4 Perk */
-    color: #ffd700;
-    font-weight: 800;
-    text-shadow: 0 0 3px #ffa500;
-}
-@keyframes xpFlash { /* LVL 3 Perk */
-    0% { background-color: #10b981; }
-    50% { background-color: #00ffaa; }
-    100% { background-color: #10b981; }
-}
-#xpContainer.xp-flash {
-    animation: xpFlash 0.3s ease-in-out;
-}
-
-/* Modal Styling */
-.modal {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.75);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-.modal-content {
-    background-color: white;
-    color: #333;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    position: relative;
-    /* *** FIXED: Ensure shop content can scroll *** */
-    max-height: 85vh; 
-    overflow-y: auto;
-}
-</style>
+</style> 
 </head>
+
 <body data-theme="dark">
+
+<div id="introScreen" class="fixed inset-0 bg-slate-900 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500" style="background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);">
+    <div class="text-9xl mb-6 animate-bounce drop-shadow-[0_0_35px_rgba(255,180,0,0.6)]">🥊</div>
+    <h1 class="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600 mb-4 drop-shadow-2xl" style="font-family: 'Russo One', sans-serif; letter-spacing: 4px; text-shadow: 4px 4px 0px #000;">SPELLING K.O.</h1>
+    <p class="text-blue-200 text-xl md:text-2xl mb-12 font-bold tracking-widest uppercase opacity-80">The Ultimate Spelling Gauntlet</p>
+    <button id="startGameBtn" class="group relative px-12 py-6 bg-yellow-400 hover:bg-yellow-300 text-black text-4xl font-black rounded-3xl shadow-[0_10px_0_rgb(161,98,7)] active:shadow-none active:translate-y-2 transition-all transform hover:scale-105">
+        <span class="relative z-10 flex items-center gap-4">PLAY GAME <span class="text-3xl group-hover:translate-x-2 transition-transform">▶</span></span>
+        <div class="absolute inset-0 rounded-3xl bg-yellow-400 blur-xl opacity-50 group-hover:opacity-100 transition-opacity -z-10"></div>
+    </button>
+    <div class="absolute bottom-8 text-gray-500 text-sm font-bold">Press PLAY to Enable Audio</div>
+</div>
+
 <div id="app" class="max-w-4xl mx-auto">
   <div class="card p-4 rounded-xl shadow-xl">
     <div class="flex items-center justify-between mb-4">
@@ -132,8 +142,7 @@ body{
         </div>
       </div>
       <div class="flex items-center gap-3 cursor-pointer" id="statsHeader">
-        <!-- *** NEW: LEVEL DISPLAY *** -->
-        <div id="levelDisplay">LVL 1</div> 
+        <div id="levelDisplay" class="bg-blue-500 text-white px-2 py-1 rounded font-bold">LVL 1</div> 
         <div class="text-sm text-gray-300 text-right">Coins: <span id="coins">0</span></div>
         <div class="text-xl font-bold" id="score">Score: 0</div>
       </div>
@@ -142,19 +151,16 @@ body{
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
       <div class="md:col-span-1 flex flex-col items-center gap-3">
         <div class="relative w-48 h-48 flex items-center justify-center">
-          <!-- Renamed balloon to puzzle-image -->
           <div id="puzzleImage" class="puzzle-image absolute bottom-0 z-1">❓</div>
           <div id="glove" class="glove">🥊</div>
           <div id="scorePopWrap" class="absolute inset-0 pointer-events-none"></div>
         </div>
-        <!-- Updated text -->
         <div class="text-center text-sm text-gray-300">Click the image to hear the word. Correct = punch!</div>
         <button id="emojiBtn" class="text-6xl big-btn bg-white/6 rounded-xl">🔊</button>
       </div>
 
       <div class="md:col-span-2">
         <div class="mb-3 flex items-center justify-between">
-          <!-- REMOVED: "Big buttons for little hands." text -->
           <div class="text-sm text-gray-300">Tap letters to build the word. Press Enter to submit.</div>
           <div class="flex gap-2">
             <select id="levelSelect" class="rounded px-2 py-1">
@@ -175,17 +181,23 @@ body{
           <button id="new" class="px-4 py-3 rounded bg-white/6">New Word</button>
           <button id="themeToggle" class="px-4 py-3 rounded bg-white/10 text-gray-400">🌙/☀️</button>
           <button id="shopBtn" class="px-4 py-3 rounded bg-yellow-500 text-black font-bold">💰 Shop</button>
+          <button id="stickerBtn" class="px-4 py-3 rounded bg-purple-600 text-white font-bold border-2 border-purple-400 shadow-md">📒 Stickers</button>
           <div id="feedback" class="ml-2 text-lg font-semibold"></div>
         </div>
 
-        <div class="mt-3 text-sm text-gray-400" id="xpContainer">
-          Streak: <span id="streak">0</span> • XP: <span id="xp">0</span>/<span id="xpNext">50</span>
+        <div class="mt-3" id="xpContainer">
+            <div class="w-full bg-gray-800 rounded-full h-6 relative border-2 border-gray-600 overflow-hidden shadow-lg mb-2">
+                <div id="streakBar" class="h-full bg-gradient-to-r from-yellow-400 to-red-500 transition-all duration-300" style="width: 0%;"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white shadow-black drop-shadow-md">
+                    COMBO: <span id="streak" class="ml-1">0</span>
+                </div>
+            </div>
+            <div class="text-xs text-gray-500 text-center font-bold">XP: <span id="xp">0</span>/<span id="xpNext">50</span></div>
         </div>
       </div>
     </div>
   </div>
   
-  <!-- Shop Modal -->
   <div id="shopModal" class="fixed inset-0 bg-black/75 flex items-center justify-center hidden z-50">
     <div class="modal-content w-11/12 max-w-lg">
       <h2 class="text-3xl font-bold mb-4">The Glove Shop</h2>
@@ -194,124 +206,131 @@ body{
     </div>
   </div>
 
-  <!-- *** NEW: PROGRESS MODAL *** -->
   <div id="progressModal" class="modal">
     <div class="modal-content w-11/12 max-w-md">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold">Player Stats & Progress</h2>
             <button id="closeProgressModal" class="text-xl font-bold p-1">&times;</button>
         </div>
-        <div id="progressContent" class="text-left space-y-2">
-            <!-- Stats inserted here by renderProgressModal -->
-        </div>
+        <div id="progressContent" class="text-left space-y-2"></div>
     </div>
   </div>
+
+  <div id="cutscene-layer" style="display:none; position:fixed; inset:0; z-index:9999; background:#050510;"></div>
+</div>
+
+<div id="stickerModal" class="modal" style="display:none;">
+    <div class="modal-content w-full h-full max-w-5xl max-h-[90vh] flex flex-col bg-slate-900 border-4 border-purple-500 rounded-3xl overflow-hidden">
+        <div class="flex justify-between items-center p-4 bg-slate-800 border-b-4 border-slate-700">
+            <div>
+                <h2 class="text-3xl font-black text-purple-400 drop-shadow-md">📒 MY STICKER BOOK</h2>
+                <div class="text-sm text-gray-400 font-bold">TAP to Select • Use Buttons to Resize/Delete</div>
+            </div>
+            <button id="closeStickerModal" class="text-3xl font-bold bg-red-500 hover:bg-red-400 text-white rounded-lg px-4 py-1 shadow-lg">&times;</button>
+        </div>
+        <div id="stickerCanvas" class="flex-1 bg-white relative overflow-hidden shadow-inner touch-none cursor-crosshair">
+            <div class="absolute inset-0 opacity-20" style="background-image: linear-gradient(#ccc 1px, transparent 1px), linear-gradient(90deg, #ccc 1px, transparent 1px); background-size: 40px 40px;"></div>
+        </div>
+        <div class="h-32 bg-slate-800 border-t-4 border-slate-700 p-4 flex gap-4 overflow-x-auto items-center" id="stickerDrawer"></div>
+    </div>
+</div>
+
+<div id="lootOverlay" class="fixed inset-0 bg-black/90 z-[10000] hidden flex-col items-center justify-center">
+    <h2 class="text-white text-4xl font-black mb-8 animate-pulse text-center">LEVEL COMPLETE!<br><span class="text-yellow-400 text-2xl">TAP THE CRATE TO OPEN!</span></h2>
+    <div id="lootCrate" class="text-[150px] cursor-pointer select-none transition-transform active:scale-95 drop-shadow-[0_0_50px_rgba(255,255,255,0.2)]">📦</div>
+    <div id="lootRewards" class="hidden flex-col items-center gap-4 animate-bounce-in">
+        <div class="text-white text-3xl font-bold">YOU FOUND:</div>
+        <div id="lootItems" class="flex gap-4 justify-center flex-wrap"></div>
+        <button id="collectLootBtn" class="mt-8 px-8 py-4 bg-green-500 hover:bg-green-400 text-white font-black text-2xl rounded-2xl shadow-lg border-b-8 border-green-700 active:border-b-0 active:translate-y-2">COLLECT!</button>
+    </div>
 </div>
 
 <script>
-// --- UTILITY FUNCTIONS ---
-function shuffle(a){ return a.slice().sort(()=>0.5-Math.random()); }
-function playSpeech(text){ try{ const u=new SpeechSynthesisUtterance(text); u.rate=0.9; speechSynthesis.speak(u); } catch(e){console.warn(e);} }
-
-// --- DATA DEFINITIONS (CONSTANTS) ---
+// --- DATA: RESTORED EMOJIS ---
 const WORD_SETS = {
-  1: [ 
-    {word:'CAT', emoji:'🐱'}, {word:'DOG', emoji:'🐶'}, {word:'SUN', emoji:'☀️'}, {word:'BED', emoji:'🛏️'}, {word:'HAT', emoji:'🎩'},
-    {word:'MUG', emoji:'☕'}, {word:'FOG', emoji:'🌫️'}, {word:'RUG', emoji:'🛋️'}, {word:'BUS', emoji:'🚌'}, {word:'PIG', emoji:'🐷'},
-    {word:'MAP', emoji:'🗺️'}, {word:'FOX', emoji:'🦊'}, {word:'KEY', emoji:'🔑'}, {word:'JAM', emoji:'🍓'}, {word:'PEN', emoji:'🖊️'},
-    {word:'TEN', emoji:'🔟'}, {word:'NET', emoji:'🥅'}, {word:'WET', emoji:'💧'}, {word:'MOP', emoji:'🧹'}, {word:'TOP', emoji:'🔝'},
-    {word:'VAN', emoji:'🚐'}, {word:'WEB', emoji:'🕷️'}, {word:'SUB', emoji:'🚇'}, {word:'CUP', emoji:'🥛'}, {word:'LOG', emoji:'🪵'},
-    {word:'BOX', emoji:'📦'}, {word:'HEN', emoji:'🐔'}, {word:'FIN', emoji:'🦈'}, {word:'LIP', emoji:'👄'}, {word:'ZIP', emoji:'🤐'},
-    {word:'JOG', emoji:'🏃'}, {word:'BAG', emoji:'🛍️'}, {word:'TAG', emoji:'🏷️'}, {word:'CAB', emoji:'🚕'}, {word:'MAD', emoji:'😡'},
-    {word:'DAD', emoji:'👨‍👧‍👦'}, {word:'SAD', emoji:'😞'}, {word:'PAD', emoji:'📝'}, {word:'GUM', emoji:'🍬'}, {word:'TUB', emoji:'🛁'},
-    {word:'NUT', emoji:'🌰'}, {word:'CUT', emoji:'✂️'}, {word:'SIT', emoji:'🪑'}, {word:'HIT', emoji:'💥'}, {word:'FIT', emoji:'💪'},
-    {word:'SIX', emoji:'6️⃣'}, {word:'MIX', emoji:'🔀'}, {word:'WIG', emoji:'👩‍🦱'}, {word:'FIG', emoji:'🥝'}, {word:'JET', emoji:'✈️'}
-  ],
-  2: [ 
-    {word:'CAKE', emoji:'🎂'}, {word:'FISH', emoji:'🐟'}, {word:'BIKE', emoji:'🚲'}, {word:'NOTE', emoji:'📝'}, {word:'TREE', emoji:'🌳'},
-    {word:'WAVE', emoji:'🌊'}, {word:'GAME', emoji:'🎮'}, {word:'HOME', emoji:'🏠'}, {word:'CUBE', emoji:'🧊'}, {word:'ROSE', emoji:'🌹'},
-    {word:'FIRE', emoji:'🔥'}, {word:'SHOE', emoji:'👟'}, {word:'FROG', emoji:'🐸'}, {word:'FLAG', emoji:'🚩'}, {word:'DRUM', emoji:'🥁'},
-    {word:'SLIP', emoji:'🛼'}, {word:'PLUG', emoji:'🔌'}, {word:'TWIN', emoji:'👯‍♀️'}, {word:'STEP', emoji:'👣'}, {word:'GRIN', emoji:'😁'},
-    {word:'GLOW', emoji:'✨'}, {word:'STAR', emoji:'⭐'}, {word:'SHIP', emoji:'🚢'}, {word:'SWAN', emoji:'🦢'}, {word:'TRAP', emoji:'𪤤'},
-    {word:'BRAG', emoji:'🗣️'}, {word:'CLIP', emoji:'📎'}, {word:'DROP', emoji:'💧'}, {word:'SPOT', emoji:'⚫'}, {word:'TUBE', emoji:'🧴'},
-    {word:'RIDE', emoji:'🎢'}, {word:'DIME', emoji:'🪙'}, {word:'LAKE', emoji:'🏞️'}, {word:'RULE', emoji:'📏'}, {word:'VOTE', emoji:'🗳️'},
-    {word:'DUCK', emoji:'🦆'}, {word:'MILK', emoji:'🥛'}, {word:'HAND', emoji:'✋'}, {word:'TENT', emoji:'⛺'}, {word:'JUMP', emoji:'🤸'},
-    {word:'KITE', emoji:'🪁'}, {word:'BUMP', emoji:'💥'}, {word:'MASK', emoji:'🎭'}, {word:'POND', emoji:'🏞️'}, {word:'YARN', emoji:'🧶'},
-    {word:'WOLF', emoji:'🐺'}, {word:'PINK', emoji:'🌸'}, {word:'BELT', emoji:'🥋'}, {word:'GIFT', emoji:'🎁'}, {word:'NEST', emoji:'🪺'}
-  ],
-  3: [ 
-    {word:'APPLE', emoji:'🍎'}, {word:'PLANT', emoji:'🪴'}, {word:'GLOBE', emoji:'🌍'}, {word:'HOUSE', emoji:'🏠'}, {word:'SNAKE', emoji:'🐍'},
-    {word:'WATER', emoji:'💧'}, {word:'TIGER', emoji:'🐯'}, {word:'FANCY', emoji:'💎'}, {word:'SHARK', emoji:'🦈'}, {word:'HEART', emoji:'❤️'},
-    {word:'PIRATE', emoji:'🏴‍☠️'}, {word:'DRAGON', emoji:'🐉'}, {word:'CHEST', emoji:'📦'}, {word:'CLOUD', emoji:'☁️'}, {word:'TRAIN', emoji:'🚂'},
-    {word:'PANDA', emoji:'🐼'}, {word:'FROSTY', emoji:'❄️'}, {word:'CROWD', emoji:'🧍'}, {word:'SCREAM', emoji:'😱'}, {word:'TRICKY', emoji:'🃏'},
-    {word:'QUEEN', emoji:'👑'}, {word:'SPOON', emoji:'🥄'}, {word:'GRASS', emoji:'🌿'}, {word:'CRUNCH', emoji:'🍎'}, {word:'BRUSH', emoji:'🖌️'},
-    {word:'CHILL', emoji:'🥶'}, {word:'SWING', emoji:'🐒'}, {word:'TRUMP', emoji:'🎺'}, {word:'SLIDE', emoji:'🛝'}, {word:'BLANK', emoji:'⬜'},
-    {word:'FRESH', emoji:'🥬'}, {word:'GRACE', emoji:'💃'}, {word:'PRINT', emoji:'🖨️'}, {word:'CLERK', emoji:'🧑‍💼'}, {word:'FLUTE', emoji:'🎶'},
-    {word:'CRANE', emoji:'🏗️'}, {word:'SPIKE', emoji:'🔪'}, {word:'SWELL', emoji:'💧'}, {word:'BLESS', emoji:'🙏'}, {word:'GLAZE', emoji:'🍩'},
-    {word:'FIGHT', emoji:'⚔️'}, {word:'COUCH', emoji:'🛋️'}, {word:'STORM', emoji:'⛈️'}, {word:'THUMB', emoji:'👍'}, {word:'SHINE', emoji:'🔆'},
-    {word:'DRIVE', emoji:'🚗'}, {word:'CLOWN', emoji:'🤡'}, {word:'SWIRL', emoji:'🍥'}, {word:'BLADE', emoji:'🔪'}, {word:'WHALE', emoji:'🐳'}
-  ],
-  4: [ 
-    {word:'FLOWER', emoji:'🌸'}, {word:'MONKEY', emoji:'🐒'}, {word:'BANANA', emoji:'🍌'}, {word:'ROCKET', emoji:'🚀'}, {word:'BUTTON', emoji:'🔘'},
-    {word:'WINDOW', emoji:'🖼️'}, {word:'GARAGE', emoji:'🚗'}, {word:'CASTLE', emoji:'🏰'}, {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'PURPLE', emoji:'🟣'},
-    {word:'ORANGE', emoji:'🍊'}, {word:'TURTLE', emoji:'🐢'}, {word:'SHADOW', emoji:'👤'}, {word:'CLOUDY', emoji:'☁️'}, {word:'LITTLE', emoji:'🤏'},
-    {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'}, {word:'TRAVEL', emoji:'🗺️'}, {word:'DRAGON', emoji:'🐉'}, {word:'FINGER', emoji:'👆'},
-    {word:'SILVER', emoji:'🪙'}, {word:'HAPPEN', emoji:'🤯'}, {word:'RETURN', emoji:'↩️'}, {word:'NUMBER', emoji:'🔢'}, {word:'SISTER', emoji:'👧'},
-    {word:'BROKEN', emoji:'💔'}, {word:'SQUARE', emoji:'🟪'}, {word:'CIRCLE', emoji:'⚪'}, {word:'YELLOW', emoji:'🟡'}, {word:'COFFEE', emoji:'☕'},
-    {word:'FLIGHT', emoji:'🛫'}, {word:'WONDER', emoji:'❓'}, {word:'CHURCH', emoji:'⛪'}, {word:'POCKET', emoji:'🪡'}, {word:'TICKET', emoji:'🎫'},
-    {word:'SWEET', emoji:'🍬'}, {word:'SPRING', emoji:'🌷'}, {word:'STREAM', emoji:'🏞️'}, {word:'HEALTH', emoji:'❤️'}, {word:'SUGGEST', emoji:'🤔'},
-    {word:'SECRET', emoji:'🤫'}, {word:'CAREFUL', emoji:'⚠️'}, {word:'EXAMPLE', emoji:'💡'}, {word:'ADDRESS', emoji:'🏠'}, {word:'BALANCE', emoji:'⚖️'},
-    {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PUPPET', emoji:'🎭'}, {word:'LADDER', emoji:'🪜'}, {word:'SILENT', emoji:'🤫'}
-  ],
-  5: [ 
-    {word:'DRAGON', emoji:'🐉'}, {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'},
-    {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'CASTLE', emoji:'🏰'}, {word:'JOURNEY', emoji:'🗺️'}, {word:'MOUNTAIN', emoji:'🏔️'}, {word:'TREASURE', emoji:'💎'},
-    {word:'CHAMPION', emoji:'👑'}, {word:'DIAMOND', emoji:'💍'}, {word:'EAGLE', emoji:'🦅'}, {word:'WHISPER', emoji:'🤫'}, {word:'VOLCANO', emoji:'🌋'},
-    {word:'LANGUAGE', emoji:'🗣️'}, {word:'COMPUTER', emoji:'💻'}, {word:'EXCELLENT', emoji:'⭐'}, {word:'MAGNETIC', emoji:'🧲'}, {word:'HARVEST', emoji:'🌾'},
-    {word:'DISCOVER', emoji:'🔎'}, {word:'HISTORY', emoji:'📜'}, {word:'ADVENTURE', emoji:'🎒'}, {word:'EXPLORER', emoji:'🧭'}, {word:'FORTRESS', emoji:'🛡️'},
-    {word:'GLADIATOR', emoji:'⚔️'}, {word:'MAJESTY', emoji:'👑'}, {word:'MYSTERY', emoji:'❓'}, {word:'TEMPLE', emoji:'🗿'}, {word:'WONDERFUL', emoji:'🤩'},
-    {word:'DELICIOUS', emoji:'😋'}, {word:'FANTASTIC', emoji:'✨'}, {word:'IMAGINE', emoji:'💭'}, {word:'PERFECT', emoji:'💯'}, {word:'SUCCESS', emoji:'✅'},
-    {word:'UNIVERSE', emoji:'🌌'}, {word:'COMFORT', emoji:'🛋️'}, {word:'DELIGHT', emoji:'😄'}, {word:'FICTION', emoji:'📚'}, {word:'GENIUS', emoji:'🧠'},
-    {word:'HONEST', emoji:'🤝'}, {word:'INVEST', emoji:'💰'}, {word:'KNOWLEDGE', emoji:'🎓'}, {word:'LIBERTY', emoji:'🗽'}, {word:'MIRACLE', emoji:'🌟'},
-    {word:'NOURISH', emoji:'🍎'}, {word:'OPPOSITE', emoji:'🔀'}, {word:'PASSION', emoji:'🔥'}, {word:'QUALITY', emoji:'💎'}, {word:'SINCERE', emoji:'💖'}
-  ]
+  1: [ {word:'CAT', emoji:'🐱'}, {word:'DOG', emoji:'🐶'}, {word:'SUN', emoji:'☀️'}, {word:'BED', emoji:'🛏️'}, {word:'HAT', emoji:'🎩'}, {word:'MUG', emoji:'☕'}, {word:'FOG', emoji:'🌫️'}, {word:'RUG', emoji:'🛋️'}, {word:'BUS', emoji:'🚌'}, {word:'PIG', emoji:'🐷'}, {word:'MAP', emoji:'🗺️'}, {word:'FOX', emoji:'🦊'}, {word:'KEY', emoji:'🔑'}, {word:'JAM', emoji:'🍓'}, {word:'PEN', emoji:'🖊️'}, {word:'TEN', emoji:'🔟'}, {word:'NET', emoji:'🥅'}, {word:'WET', emoji:'💧'}, {word:'MOP', emoji:'🧹'}, {word:'TOP', emoji:'🔝'}, {word:'VAN', emoji:'🚐'}, {word:'WAX', emoji:'🕯️'}, {word:'BOX', emoji:'📦'}, {word:'HEN', emoji:'🐔'}, {word:'FIN', emoji:'🦈'}, {word:'LIP', emoji:'👄'}, {word:'ZIP', emoji:'🤐'}, {word:'JOG', emoji:'🏃'}, {word:'BAG', emoji:'🛍️'}, {word:'TAG', emoji:'🏷️'}, {word:'CAB', emoji:'🚕'}, {word:'MAD', emoji:'😡'}, {word:'DAD', emoji:'👨‍👧‍👦'}, {word:'SAD', emoji:'😞'}, {word:'PAD', emoji:'📝'}, {word:'GUM', emoji:'🍬'}, {word:'TUB', emoji:'🛁'}, {word:'NUT', emoji:'🌰'}, {word:'CUT', emoji:'✂️'}, {word:'SIT', emoji:'🪑'}, {word:'HIT', emoji:'💥'}, {word:'FIT', emoji:'💪'}, {word:'SIX', emoji:'6️⃣'}, {word:'MIX', emoji:'🔀'}, {word:'WIG', emoji:'👩‍🦱'}, {word:'FIG', emoji:'🥝'}, {word:'JET', emoji:'✈️'}, {word:'LEG', emoji:'🦵'}, {word:'HOG', emoji:'🐗'}, {word:'DOT', emoji:'🔴'}, {word:'WEB', emoji:'🕸️'}, {word:'CAN', emoji:'🥫'}, {word:'LAD', emoji:'👦'}, {word:'LID', emoji:'🍾'}, {word:'YEP', emoji:'✅'}, {word:'COB', emoji:'🌽'}, {word:'GAB', emoji:'🗣️'}, {word:'JOB', emoji:'💼'}, {word:'COD', emoji:'🐟'}, {word:'JIB', emoji:'⛵'}, {word:'GOT', emoji:'📥'}, {word:'HIS', emoji:'👆'}, {word:'HOW', emoji:'❓'} ],
+  2: [ {word:'CAKE', emoji:'🎂'}, {word:'GUST', emoji:'💨'}, {word:'FISH', emoji:'🐟'}, {word:'BIKE', emoji:'🚲'}, {word:'NOTE', emoji:'📝'}, {word:'TREE', emoji:'🌳'}, {word:'WAVE', emoji:'🌊'}, {word:'GAME', emoji:'🎮'}, {word:'HOME', emoji:'🏠'}, {word:'CUBE', emoji:'🧊'}, {word:'ROSE', emoji:'🌹'}, {word:'FIRE', emoji:'🔥'}, {word:'SHOE', emoji:'👟'}, {word:'FROG', emoji:'🐸'}, {word:'FLAG', emoji:'🚩'}, {word:'DRUM', emoji:'🥁'}, {word:'SLIP', emoji:'🛼'}, {word:'PLUG', emoji:'🔌'}, {word:'TWIN', emoji:'👯‍♀️'}, {word:'STEP', emoji:'👣'}, {word:'GRIN', emoji:'😁'}, {word:'GLOW', emoji:'✨'}, {word:'STAR', emoji:'⭐'}, {word:'SHIP', emoji:'🚢'}, {word:'SWAN', emoji:'🦢'}, {word:'TRAP', emoji:'🪤'}, {word:'BRAG', emoji:'🗣️'}, {word:'CLIP', emoji:'📎'}, {word:'DROP', emoji:'💧'}, {word:'SPOT', emoji:'⚫'}, {word:'TUBE', emoji:'🧴'}, {word:'RIDE', emoji:'🎢'}, {word:'DIME', emoji:'🪙'}, {word:'LAKE', emoji:'🏞️'}, {word:'RULE', emoji:'📏'}, {word:'VOTE', emoji:'🗳️'}, {word:'DUCK', emoji:'🦆'}, {word:'MILK', emoji:'🥛'}, {word:'HAND', emoji:'✋'}, {word:'TENT', emoji:'⛺'}, {word:'JUMP', emoji:'🤸'}, {word:'KITE', emoji:'🪁'}, {word:'BUMP', emoji:'💥'}, {word:'MASK', emoji:'🎭'}, {word:'POND', emoji:'🏞️'}, {word:'YARN', emoji:'🧶'}, {word:'WOLF', emoji:'🐺'}, {word:'PINK', emoji:'🌸'}, {word:'BELT', emoji:'🥋'}, {word:'GIFT', emoji:'🎁'}, {word:'NEST', emoji:'🪹'}, {word:'SPIN', emoji:'💫'}, {word:'SLOB', emoji:'🤮'}, {word:'CLAN', emoji:'👨‍👩‍👧'}, {word:'FLIP', emoji:'🤸'}, {word:'CLOP', emoji:'🐴'}, {word:'BRIM', emoji:'🧢'}, {word:'BLOT', emoji:'🧻'}, {word:'CRUX', emoji:'✝️'}, {word:'FLAT', emoji:'📐'}, {word:'GRIP', emoji:'🤝'}, {word:'HUMP', emoji:'🐪'}, {word:'JILT', emoji:'💔'}, {word:'LISP', emoji:'👅'}, {word:'MUST', emoji:'📝'}, {word:'SHED', emoji:'🏡'}, {word:'SOAP', emoji:'🧼'}, {word:'STEM', emoji:'🌱'}, {word:'TUCK', emoji:'🧺'}, {word:'TWIG', emoji:'🌿'} ],
+  3: [ {word:'APPLE', emoji:'🍎'}, {word:'PLANT', emoji:'🪴'}, {word:'SWEEP', emoji:'🧹'}, {word:'GLOBE', emoji:'🌍'}, {word:'HOUSE', emoji:'🏠'}, {word:'SNAKE', emoji:'🐍'}, {word:'WATER', emoji:'💧'}, {word:'TIGER', emoji:'🐯'}, {word:'FANCY', emoji:'💎'}, {word:'SHARK', emoji:'🦈'}, {word:'HEART', emoji:'❤️'}, {word:'PIRATE', emoji:'🏴‍☠️'}, {word:'DRAGON', emoji:'🐉'}, {word:'CHEST', emoji:'📦'}, {word:'CLOUD', emoji:'☁️'}, {word:'TRAIN', emoji:'🚂'}, {word:'PANDA', emoji:'🐼'}, {word:'FROSTY', emoji:'❄️'}, {word:'CROWD', emoji:'🧍'}, {word:'SCREAM', emoji:'😱'}, {word:'TRICKY', emoji:'🃏'}, {word:'QUEEN', emoji:'👑'}, {word:'SPOON', emoji:'🥄'}, {word:'GRASS', emoji:'🌿'}, {word:'CRUNCH', emoji:'🍎'}, {word:'BRUSH', emoji:'🖌️'}, {word:'CHILL', emoji:'🥶'}, {word:'SWING', emoji:'🐒'}, {word:'TRUMP', emoji:'🎺'}, {word:'SLIDE', emoji:'🛝'}, {word:'BLANK', emoji:'⬜'}, {word:'FRESH', emoji:'🥬'}, {word:'GRACE', emoji:'💃'}, {word:'PRINT', emoji:'🖨️'}, {word:'CLERK', emoji:'🧑‍💼'}, {word:'FLUTE', emoji:'🎶'}, {word:'CRANE', emoji:'🏗️'}, {word:'SPIKE', emoji:'🔪'}, {word:'SWELL', emoji:'💧'}, {word:'BLESS', emoji:'🙏'}, {word:'GLAZE', emoji:'🍩'}, {word:'FIGHT', emoji:'⚔️'}, {word:'COUCH', emoji:'🛋️'}, {word:'STORM', emoji:'⛈️'}, {word:'THUMB', emoji:'👍'}, {word:'SHINE', emoji:'🔆'}, {word:'DRIVE', emoji:'🚗'}, {word:'CLOWN', emoji:'🤡'}, {word:'SWIRL', emoji:'🍥'}, {word:'BLADE', emoji:'🔪'}, {word:'WHALE', emoji:'🐳'}, {word:'GHOST', emoji:'👻'}, {word:'WHIRL', emoji:'🌪️'}, {word:'CATCH', emoji:'🧤'}, {word:'SMOKE', emoji:'💨'}, {word:'TRASH', emoji:'🗑️'}, {word:'CRUST', emoji:'🍞'}, {word:'PLUME', emoji:'💨'}, {word:'ACORN', emoji:'🌰'}, {word:'SPANK', emoji:'✋'}, {word:'GLORY', emoji:'🌟'}, {word:'TWIRL', emoji:'💃'}, {word:'SLUMP', emoji:'😔'}, {word:'CHURN', emoji:'🐄'}, {word:'FLUSH', emoji:'🚽'}, {word:'GRUMP', emoji:'😠'}, {word:'BLAST', emoji:'💥'}, {word:'SHAME', emoji:'😳'}, {word:'BLEAK', emoji:'😔'}, {word:'PLUSH', emoji:'🧸'}, {word:'WRING', emoji:'🧼'} ],
+  4: [ {word:'FLOWER', emoji:'🌸'}, {word:'MONKEY', emoji:'🐒'}, {word:'BANANA', emoji:'🍌'}, {word:'ROCKET', emoji:'🚀'}, {word:'BUTTON', emoji:'🔘'}, {word:'WINDOW', emoji:'🖼️'}, {word:'GARAGE', emoji:'🚗'}, {word:'CASTLE', emoji:'🏰'}, {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'PURPLE', emoji:'🟣'}, {word:'ORANGE', emoji:'🍊'}, {word:'TURTLE', emoji:'🐢'}, {word:'SHADOW', emoji:'👤'}, {word:'CLOUDY', emoji:'☁️'}, {word:'LITTLE', emoji:'🤏'}, {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'}, {word:'TRAVEL', emoji:'🗺️'}, {word:'DRAGON', emoji:'🐉'}, {word:'FINGER', emoji:'👆'}, {word:'SILVER', emoji:'🪙'}, {word:'HAPPEN', emoji:'🤯'}, {word:'RETURN', emoji:'↩️'}, {word:'NUMBER', emoji:'🔢'}, {word:'SISTER', emoji:'👧'}, {word:'BROKEN', emoji:'💔'}, {word:'SQUARE', emoji:'🟪'}, {word:'CIRCLE', emoji:'⚪'}, {word:'YELLOW', emoji:'🟡'}, {word:'COFFEE', emoji:'☕'}, {word:'FLIGHT', emoji:'🛫'}, {word:'WONDER', emoji:'❓'}, {word:'CHURCH', emoji:'⛪'}, {word:'POCKET', emoji:'👖'}, {word:'TICKET', emoji:'🎫'}, {word:'SWEET', emoji:'🍬'}, {word:'SPRING', emoji:'🌷'}, {word:'STREAM', emoji:'🏞️'}, {word:'HEALTH', emoji:'❤️'}, {word:'SUGGEST', emoji:'🤔'}, {word:'SECRET', emoji:'🤫'}, {word:'CAREFUL', emoji:'⚠️'}, {word:'EXAMPLE', emoji:'💡'}, {word:'ADDRESS', emoji:'🏠'}, {word:'BALANCE', emoji:'⚖️'}, {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PUPPET', emoji:'🎭'}, {word:'LADDER', emoji:'🪜'}, {word:'SILENT', emoji:'🤫'}, {word:'QUIVER', emoji:'🏹'}, {word:'FLICKER', emoji:'🕯️'}, {word:'SNOWMAN', emoji:'⛄'}, {word:'CHICKEN', emoji:'🐔'}, {word:'PROBLEM', emoji:'❓'}, {word:'SPARROW', emoji:'🐦'}, {word:'MEASURE', emoji:'📏'}, {word:'BALANCE', emoji:'⚖️'}, {word:'ADULT', emoji:'🧑'}, {word:'ELEVATOR', emoji:'⬆️'}, {word:'CHESTNUT', emoji:'🌰'}, {word:'DISCUSS', emoji:'💬'}, {word:'ELEMENT', emoji:'🧪'}, {word:'HISTORY', emoji:'📜'}, {word:'MAGICAL', emoji:'🪄'}, {word:'MARVEL', emoji:'😮'}, {word:'PERFECT', emoji:'💯'}, {word:'SUCCESS', emoji:'✅'}, {word:'TREASURE', emoji:'💎'}, {word:'WONDER', emoji:'✨'} ],
+  5: [ {word:'DRAGON', emoji:'🐉'}, {word:'BASKET', emoji:'🧺'}, {word:'GUITAR', emoji:'🎸'}, {word:'PENCIL', emoji:'✏️'}, {word:'PLANET', emoji:'🪐'}, {word:'WIZARD', emoji:'🧙‍♂️'}, {word:'CASTLE', emoji:'🏰'}, {word:'JOURNEY', emoji:'🗺️'}, {word:'MOUNTAIN', emoji:'🏔️'}, {word:'TREASURE', emoji:'💎'}, {word:'CHAMPION', emoji:'👑'}, {word:'DIAMOND', emoji:'💍'}, {word:'EAGLE', emoji:'🦅'}, {word:'WHISPER', emoji:'🤫'}, {word:'VOLCANO', emoji:'🌋'}, {word:'LANGUAGE', emoji:'🗣️'}, {word:'COMPUTER', emoji:'💻'}, {word:'EXCELLENT', emoji:'⭐'}, {word:'MAGNETIC', emoji:'🧲'}, {word:'HARVEST', emoji:'🌾'}, {word:'DISCOVER', emoji:'🔎'}, {word:'HISTORY', emoji:'📜'}, {word:'ADVENTURE', emoji:'🎒'}, {word:'EXPLORER', emoji:'🧭'}, {word:'FORTRESS', emoji:'🛡️'}, {word:'GLADIATOR', emoji:'⚔️'}, {word:'MAJESTY', emoji:'👑'}, {word:'MYSTERY', emoji:'❓'}, {word:'TEMPLE', emoji:'🗿'}, {word:'WONDERFUL', emoji:'🤩'}, {word:'DELICIOUS', emoji:'😋'}, {word:'FANTASTIC', emoji:'✨'}, {word:'IMAGINE', emoji:'💭'}, {word:'PERFECT', emoji:'💯'}, {word:'SUCCESS', emoji:'✅'}, {word:'UNIVERSE', emoji:'🌌'}, {word:'COMFORT', emoji:'🛋️'}, {word:'DELIGHT', emoji:'😄'}, {word:'FICTION', emoji:'📚'}, {word:'GENIUS', emoji:'🧠'}, {word:'HONEST', emoji:'🤝'}, {word:'INVEST', emoji:'💰'}, {word:'KNOWLEDGE', emoji:'🎓'}, {word:'LIBERTY', emoji:'🗽'}, {word:'MIRACLE', emoji:'🌟'}, {word:'NOURISH', emoji:'🍎'}, {word:'OPPOSITE', emoji:'🔀'}, {word:'PASSION', emoji:'🔥'}, {word:'QUALITY', emoji:'💎'}, {word:'SINCERE', emoji:'💖'}, {word:'ACCOMPLISH', emoji:'✅'}, {word:'CHALLENGE', emoji:'🧗'}, {word:'EDUCATION', emoji:'🎓'}, {word:'ENTERPRISE', emoji:'🚀'}, {word:'EXPERIENCE', emoji:'💡'}, {word:'GOVERNMENT', emoji:'🏛️'}, {word:'IMPROVEMENT', emoji:'📈'}, {word:'INTELLIGENCE', emoji:'🧠'}, {word:'LEADERSHIP', emoji:'👑'}, {word:'MANAGEMENT', emoji:'💼'}, {word:'OPPORTUNITY', emoji:'🎁'}, {word:'PARTNERSHIP', emoji:'🤝'}, {word:'PERFORMANCE', emoji:'🏆'}, {word:'PROFESSIONAL', emoji:'🧑‍💼'}, {word:'RESPONSIBLE', emoji:'🛡️'}, {word:'STRATEGY', emoji:'♟️'}, {word:'TECHNOLOGY', emoji:'🤖'}, {word:'UNDERSTAND', emoji:'🤔'}, {word:'VISIONARY', emoji:'👁️'}, {word:'WELLNESS', emoji:'⚕️'} ]
 };
+
 const GLOVE_DATA = {
-    'base': { name: 'Base Glove', emoji: '🥊', price: 0, perk: 'None' },
-    'training': { name: 'Training Glove', emoji: '🥋', price: 50, perk: 'XP BOOST! Earns +1 Bonus XP.' },
-    'sparkle': { name: 'Sparkle Glove', emoji: '✨', price: 150, perk: 'Coin Magnet! Earns +1 Bonus Coin.' },
-    'gold': { name: 'Gold Glove', emoji: '🥇', price: 500, perk: 'TKO! Extra points on big streaks.' },
-    'champion': { name: 'Champion Glove', emoji: '🏆', price: 1000, perk: 'Final Score Multiplier.' },
-    'hint': { name: 'Hint Glove', emoji: '💡', price: 750, perk: 'Extra Hint' },
-    // *** NEW SHOP ITEMS ***
-    'magnet': { name: 'Magnet Glove', emoji: '🧲', price: 300, perk: 'Auto-place 1st letter.' },
-    'timewarp': { name: 'Time Warp', emoji: '⏳', price: 1200, perk: 'Massive score bonus on Level Up.' },
-    'star': { name: 'Star Glove', emoji: '🌟', price: 2000, perk: 'Guaranteed max score per word.' },
+    'base': { name: 'Red Boxer', emoji: '🥊', price: 0, perk: 'None' },
+    'training': { name: 'Karate', emoji: '🥋', price: 15, perk: '+1 XP per word' },
+    'sparkle': { name: 'Sparkle', emoji: '✨', price: 40, perk: '+1 Coin per word' },
+    'robot': { name: 'Robo-Grip', emoji: '🦾', price: 10, perk: 'Just for looks!' },
+    'zombie': { name: 'Zombie Hand', emoji: '🧟', price: 10, perk: 'Just for looks!' },
+    'alien': { name: 'Alien Claw', emoji: '👽', price: 10, perk: 'Just for looks!' },
+    'princess': { name: 'Royal Wave', emoji: '👋', price: 20, perk: 'Just for looks!' },
+    'skeleton': { name: 'Bone Hand', emoji: '💀', price: 15, perk: 'Just for looks!' },
+    'cat': { name: 'Kitty Paw', emoji: '🐾', price: 20, perk: 'Meow!' },
+    'ice': { name: 'Ice Breaker', emoji: '🧊', price: 25, perk: 'So Cool!' },
+    'fire': { name: 'Fireball', emoji: '🔥', price: 25, perk: 'Super Hot!' },
+    'cactus': { name: 'Prickly', emoji: '🌵', price: 15, perk: 'Don\'t touch!' },
+    'crab': { name: 'Crab Pinch', emoji: '🦀', price: 20, perk: 'Snip Snip!' },
+    'gold': { name: 'Gold Glove', emoji: '🥇', price: 150, perk: 'Big Score Bonus!' },
+};
+
+const STICKER_DATA = {
+    's_cat': { name: 'Kitty', emoji: '🐱', price: 15 },
+    's_dog': { name: 'Puppy', emoji: '🐶', price: 15 },
+    's_rex': { name: 'T-Rex', emoji: '🦖', price: 25 },
+    's_unicorn': { name: 'Unicorn', emoji: '🦄', price: 25 },
+    's_panda': { name: 'Panda', emoji: '🐼', price: 20 },
+    's_lion': { name: 'Lion', emoji: '🦁', price: 20 },
+    's_crab': { name: 'Crab', emoji: '🦀', price: 15 },
+    's_butterfly': { name: 'Butterfly', emoji: '🦋', price: 10 },
+    's_pizza': { name: 'Pizza', emoji: '🍕', price: 10 },
+    's_donut': { name: 'Donut', emoji: '🍩', price: 10 },
+    's_icecream': { name: 'Ice Cream', emoji: '🍦', price: 10 },
+    's_burger': { name: 'Burger', emoji: '🍔', price: 15 },
+    's_apple': { name: 'Apple', emoji: '🍎', price: 5 },
+    's_rocket': { name: 'Rocket', emoji: '🚀', price: 20 },
+    's_star': { name: 'Star', emoji: '⭐', price: 10 },
+    's_moon': { name: 'Moon', emoji: '🌙', price: 15 },
+    's_planet': { name: 'Planet', emoji: '🪐', price: 20 },
+    's_alien': { name: 'Alien', emoji: '👽', price: 20 },
+    's_smile': { name: 'Big Smile', emoji: '😄', price: 5 },
+    's_cool': { name: 'Cool Guy', emoji: '😎', price: 10 },
+    's_love': { name: 'Love', emoji: '❤️', price: 10 },
+    's_poop': { name: 'Silly Poop', emoji: '💩', price: 15 },
+    's_ghost': { name: 'Ghost', emoji: '👻', price: 15 },
+    's_fire': { name: 'Fire', emoji: '🔥', price: 15 },
+    's_crown': { name: 'Crown', emoji: '👑', price: 30 },
 };
 
 // --- GLOBAL STATE ---
+let shopTab = 'gloves'; 
 let store = JSON.parse(localStorage.getItem('spellingBalloon_v2')||'{}');
 let coins = store.coins||0, score=store.score||0, xp=store.xp||0, streak=store.streak||0;
-let maxStreak = store.maxStreak||0; // Track Max Streak
-let wordsSpelled = store.wordsSpelled || 0; // Track total words spelled
-let currentGlove = store.currentGlove||'base'; // Changed default to 'base'
-let ownedGloves = store.ownedGloves || ['base']; // Ensure base is owned
-let levelChoice = parseInt(store.levelChoice||1); // *** FIXED: Load levelChoice from store ***
-let currentWordData = null; // Stores {word: 'X', emoji: 'Y'}
+let maxStreak = store.maxStreak||0; 
+let wordsSpelled = store.wordsSpelled || 0;
+let currentGlove = store.currentGlove||'base'; 
+let ownedGloves = store.ownedGloves || ['base'];
+let ownedStickers = store.ownedStickers || [];
+let placedStickers = store.placedStickers || [];
+let levelChoice = parseInt(store.levelChoice||1);
+let currentWordData = null; 
 let currentWord=null, userAnswer=[];
-let isAnimating = false; // Prevent double-clicks during animation
+let isAnimating = false; 
+let coinRushCounter = store.coinRushCounter || 0;
+let currentWordFailed = false;
+let roundWins = store.roundWins || 0; 
+let isBossRound = false;
+const COIN_RUSH_DURATION = 15;
+const COIN_RUSH_MULTIPLIER = 5;
 
-// --- Sound Effects (Local only implementation) ---
-const correctSound = new Audio('https://freesound.org/data/previews/270/270156_2713636-lq.mp3'); 
-const wrongSound = new Audio('https://freesound.org/data/previews/270/270157_2713636-lq.mp3'); 
-const punchSound = new Audio('https://freesound.org/data/previews/120/120374_1844266-lq.mp3');
-const levelUpSound = new Audio('https://freesound.org/data/previews/269/269026_2713636-lq.mp3');
+// Sounds
+const correctSound = new Audio('https://s3.amazonaws.com/iamlab/audio/chime_success.mp3'); 
+const wrongSound = new Audio('https://s3.amazonaws.com/iamlab/audio/buzz_fail.mp3');
+const punchSound = new Audio('https://s3.amazonaws.com/iamlab/audio/punch_impact.mp3');
+const levelUpSound = new Audio('https://s3.amazonaws.com/iamlab/audio/level_up_fanfare.mp3');
 
-
-// --- DOM CACHE ---
+// DOM Elements
 const el={
   glove: document.getElementById('glove'),
-  puzzleImage: document.getElementById('puzzleImage'), // Renamed from 'balloon'
+  puzzleImage: document.getElementById('puzzleImage'), 
   score: document.getElementById('score'),
   slots: document.getElementById('slots'),
   tiles: document.getElementById('tiles'),
@@ -327,54 +346,366 @@ const el={
   levelSelect: document.getElementById('levelSelect'),
   themeToggle: document.getElementById('themeToggle'),
   levelDisplay: document.getElementById('levelDisplay'), 
-  xpContainer: document.getElementById('xpContainer'), // Added XP Container for flashing
-  // Shop DOM elements
+  xpContainer: document.getElementById('xpContainer'),
   shopModal: document.getElementById('shopModal'),
   shopContent: document.getElementById('shopContent'),
   closeShop: document.getElementById('closeShop'),
   shopBtn: document.getElementById('shopBtn'),
-  // Progress Modal
   progressModal: document.getElementById('progressModal'),
   closeProgressModal: document.getElementById('closeProgressModal'),
   progressContent: document.getElementById('progressContent'),
-  statsHeader: document.getElementById('statsHeader'), // Clickable header area
+  statsHeader: document.getElementById('statsHeader'),
+  stickerBtn: document.getElementById('stickerBtn'),
+  stickerModal: document.getElementById('stickerModal'),
+  closeStickerModal: document.getElementById('closeStickerModal'),
+  stickerCanvas: document.getElementById('stickerCanvas'),
+  stickerDrawer: document.getElementById('stickerDrawer')
 };
 
-/* ======================= Gameplay Functions ======================= */
-function pickWord(){
-  const set=WORD_SETS[levelChoice]||WORD_SETS[1];
-  
-  // Get word index from storage
-  let wordIndex = localStorage.getItem('wordIndex') ? parseInt(localStorage.getItem('wordIndex')) : 0;
-  
-  // If we reach the end of the set, loop back to the beginning
-  if (wordIndex >= set.length) {
-      wordIndex = 0;
-      localStorage.setItem('wordIndex', 0);
-  }
+// --- UTILITY FUNCTIONS ---
+function shuffle(a){ return a.slice().sort(()=>0.5-Math.random()); }
 
-  currentWordData = set[wordIndex];
-  currentWord = currentWordData.word.toUpperCase();
-  el.puzzleImage.textContent = currentWordData.emoji; // Use new element reference
-  el.emojiBtn.textContent = currentWordData.emoji;
+// --- NEW VOICE SETUP ---
+let availableVoices = [];
 
-  // Update storage for the next word
-  localStorage.setItem('wordIndex', wordIndex + 1);
+// Force browser to load voices immediately (Fixes the "robotic default" issue)
+window.speechSynthesis.onvoiceschanged = () => {
+    availableVoices = window.speechSynthesis.getVoices();
+};
 
-  renderWord();
+function playSpeech(text){ 
+  try{ 
+    // 1. Stop any previous talking immediately
+    window.speechSynthesis.cancel(); 
+    
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; 
+    
+    // ** NEW SETTINGS FOR CLARITY **
+    u.rate = 0.9;   // Clear speed (not too fast, not too slow)
+    u.pitch = 1.0;  // Natural pitch (Removes the digital squeak)
+    u.volume = 1.0; 
+
+    // 2. Load voices if they haven't loaded yet
+    if (availableVoices.length === 0) {
+        availableVoices = window.speechSynthesis.getVoices();
+    }
+
+    // 3. Find the best "Human-sounding" voice available
+    const bestVoice = availableVoices.find(v => v.name.includes("Google US English")) // Best on Chrome
+                   || availableVoices.find(v => v.name.includes("Samantha"))          // Best on Mac/iPad
+                   || availableVoices.find(v => v.name.includes("Microsoft Zira"))    // Best on Windows
+                   || availableVoices.find(v => v.lang === 'en-US');                  
+    
+    if (bestVoice) u.voice = bestVoice;
+
+    window.speechSynthesis.speak(u); 
+  } catch(e){console.warn(e);} 
+}
+
+/* ======================= Cutscene Module ======================= */
+const VictoryScene = {
+    scene: null, camera: null, renderer: null, clock: null,
+    boxer: null, mixer: null, animationId: null,
+    letterBoxes: [], particles: [], confetti: [],
+    timeline: 0, isAnimating: false, currentStep: 0,
+    container: null,
+    SEQUENCE: [
+        { time: 0.8, char: 'W', pos: -3, hand: 'left', spawned: false, punched: false },
+        { time: 1.8, char: 'I', pos: 0, hand: 'right', spawned: false, punched: false },
+        { time: 2.8, char: 'N', pos: 3, hand: 'left', finish: true, spawned: false, punched: false }
+    ],
+    init() {
+        this.container = document.getElementById("cutscene-layer");
+        if (!this.container) return;
+        this.container.innerHTML = '';
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x050510);
+        this.scene.fog = new THREE.FogExp2(0x050510, 0.02);
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.set(0, 2, 8);
+        this.camera.lookAt(0, 1, 0);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.container.appendChild(this.renderer.domElement);
+        this.setupLights();
+        this.createArena();
+        this.boxer = this.createBoxer();
+        this.scene.add(this.boxer.mesh);
+        this.clock = new THREE.Clock();
+        window.addEventListener('resize', () => this.onWindowResize(), false);
+    },
+    start() {
+        if (!this.container || !this.renderer) this.init();
+        if (!this.container) return;
+        this.container.style.display = "block";
+        this.container.style.opacity = "1";
+        this.resetState();
+        this.isAnimating = true;
+        this.animate();
+        setTimeout(() => { this.stop(); }, 6000);
+    },
+    stop() {
+        this.isAnimating = false;
+        if (this.animationId) cancelAnimationFrame(this.animationId);
+        this.container.style.opacity = "0";
+        setTimeout(() => {
+            this.container.style.display = "none";
+            triggerLootBox(); 
+        }, 1000);
+    },
+    resetState() {
+        this.timeline = 0;
+        this.currentStep = 0;
+        this.letterBoxes.forEach(b => this.scene.remove(b));
+        this.particles.forEach(p => this.scene.remove(p));
+        this.confetti.forEach(c => this.scene.remove(c));
+        this.letterBoxes = [];
+        this.particles = [];
+        this.confetti = [];
+        this.SEQUENCE.forEach(s => { s.spawned = false; s.punched = false; });
+        if(this.boxer) {
+            this.boxer.leftArm.rotation.set(0.78, 0, 0.39);
+            this.boxer.rightArm.rotation.set(0.78, 0, -0.39);
+        }
+    },
+    setupLights() {
+        const ambient = new THREE.AmbientLight(0x404040);
+        this.scene.add(ambient);
+        const spotLight = new THREE.SpotLight(0xffffff, 1);
+        spotLight.position.set(0, 15, 5);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.5;
+        spotLight.castShadow = true;
+        this.scene.add(spotLight);
+        const backLight = new THREE.PointLight(0x0088ff, 1, 20);
+        backLight.position.set(-5, 5, -5);
+        this.scene.add(backLight);
+        const backLight2 = new THREE.PointLight(0xff0088, 1, 20);
+        backLight2.position.set(5, 5, -5);
+        this.scene.add(backLight2);
+    },
+    createArena() {
+        const floorGeo = new THREE.PlaneGeometry(20, 20);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.2 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        this.scene.add(floor);
+    },
+    createBoxer() {
+        const group = new THREE.Group();
+        const skinMat = new THREE.MeshLambertMaterial({ color: 0x8d5524 });
+        const gloveMat = new THREE.MeshPhongMaterial({ color: 0xcc0000, shininess: 100 });
+        const shortsMat = new THREE.MeshLambertMaterial({ color: 0x0033cc });
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), skinMat);
+        torso.position.y = 2.2; torso.castShadow = true; group.add(torso);
+        const shorts = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.8, 0.65), shortsMat);
+        shorts.position.y = 1.4; shorts.castShadow = true; group.add(shorts);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.5), skinMat);
+        head.position.y = 3.3; head.castShadow = true; group.add(head);
+        function createArm(x, isLeft) {
+            const armGroup = new THREE.Group();
+            armGroup.position.set(x, 2.8, 0);
+            const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.8), skinMat);
+            upper.position.y = -0.4; armGroup.add(upper);
+            const foreArmGroup = new THREE.Group();
+            foreArmGroup.position.y = -0.8;
+            const fore = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.8), skinMat);
+            fore.position.y = -0.4;
+            foreArmGroup.add(fore);
+            const glove = new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), gloveMat);
+            glove.position.y = -0.9; foreArmGroup.add(glove);
+            armGroup.add(foreArmGroup);
+            return { armGroup, foreArmGroup };
+        }
+        const left = createArm(-0.6, true);
+        group.add(left.armGroup);
+        const right = createArm(0.6, false);
+        group.add(right.armGroup);
+        const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1.5), skinMat);
+        leftLeg.position.set(-0.3, 0.75, 0); group.add(leftLeg);
+        const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1.5), skinMat);
+        rightLeg.position.set(0.3, 0.75, 0); group.add(rightLeg);
+        return { mesh: group, leftArm: left.armGroup, leftForeArm: left.foreArmGroup, rightArm: right.armGroup, rightForeArm: right.foreArmGroup };
+    },
+    createLetterBlock(char, xPos) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256; canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        const grd = ctx.createLinearGradient(0, 0, 256, 256);
+        grd.addColorStop(0, "#D4AF37");
+        grd.addColorStop(1, "#AA8822");
+        ctx.fillStyle = grd; ctx.fillRect(0, 0, 256, 256);
+        ctx.strokeStyle = "#FFF"; ctx.lineWidth = 10; ctx.strokeRect(5, 5, 246, 246);
+        ctx.fillStyle = "#FFFFFF"; ctx.font = "bold 180px Arial";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(char, 128, 128);
+        const texture = new THREE.CanvasTexture(canvas);
+        const geometry = new THREE.BoxGeometry(1.5, 1.5, 0.5);
+        const material = new THREE.MeshPhongMaterial({ map: texture });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(xPos, 2.5, 2); mesh.scale.set(0,0,0); mesh.castShadow = true;
+        mesh.userData = { active: false, velocity: new THREE.Vector3(), rotVelocity: new THREE.Vector3() };
+        this.scene.add(mesh);
+        this.letterBoxes.push(mesh);
+        return mesh;
+    },
+    createExplosion(pos) {
+        const geo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+        for(let i=0; i<20; i++) {
+            const m = new THREE.Mesh(geo, mat);
+            m.position.copy(pos);
+            m.position.x += (Math.random()-0.5)*1.5; m.position.y += (Math.random()-0.5)*1.5;
+            m.userData = { velocity: new THREE.Vector3((Math.random()-0.5)*10, (Math.random()-0.5)*10, (Math.random()-0.5)*10), life: 1.0 };
+            this.scene.add(m); this.particles.push(m);
+        }
+    },
+    createConfetti() {
+        const geo = new THREE.PlaneGeometry(0.1, 0.2);
+        const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00];
+        for(let i=0; i<100; i++) {
+            const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: colors[Math.floor(Math.random()*colors.length)], side: THREE.DoubleSide }));
+            m.position.set((Math.random()-0.5)*20, 10+Math.random()*5, (Math.random()-0.5)*10);
+            m.userData = { velocity: new THREE.Vector3((Math.random()-0.5)*0.1, -Math.random()*0.2-0.1, (Math.random()-0.5)*0.1), rotSpeed: new THREE.Vector3(Math.random()*0.2, Math.random()*0.2, 0) };
+            this.scene.add(m); this.confetti.push(m);
+        }
+    },
+    triggerPunch(hand) {
+        this.boxer.mesh.userData.punching = hand;
+        this.boxer.mesh.userData.punchTime = 0;
+    },
+    onWindowResize() {
+        if(!this.camera || !this.renderer) return;
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    },
+    animate() {
+        if (!this.isAnimating) return;
+        this.animationId = requestAnimationFrame(() => this.animate());
+        const delta = this.clock.getDelta();
+        const elapsed = this.clock.getElapsedTime();
+        this.timeline += delta;
+        if(this.currentStep < this.SEQUENCE.length) {
+            const seq = this.SEQUENCE[this.currentStep];
+            if(this.timeline >= seq.time - 0.4 && !seq.spawned) {
+                const box = this.createLetterBlock(seq.char, seq.pos);
+                box.userData.active = true;
+                seq.spawned = true;
+            }
+            if(this.timeline >= seq.time && !seq.punched) {
+                this.triggerPunch(seq.hand);
+                this.createExplosion(new THREE.Vector3(seq.pos, 2.5, 2));
+                const box = this.letterBoxes[this.letterBoxes.length-1];
+                if(box) { box.scale.set(1.5, 1.5, 1.5); box.userData.rotVelocity.set((Math.random()-0.5)*5, (Math.random()-0.5)*5, 0); }
+                if(seq.finish) { 
+                    this.createConfetti();
+                    this.boxer.leftArm.rotation.set(0, 0, 2.9);
+                    this.boxer.rightArm.rotation.set(0, 0, -2.9);
+                }
+                seq.punched = true;
+                this.currentStep++;
+            }
+        }
+        if(!this.boxer.mesh.userData.punching) {
+            this.boxer.mesh.position.y = Math.sin(elapsed * 5) * 0.05;
+        } else {
+            const hand = this.boxer.mesh.userData.punching;
+            this.boxer.mesh.userData.punchTime += delta * 8;
+            const pt = this.boxer.mesh.userData.punchTime;
+            const val = Math.sin(Math.min(pt, Math.PI));
+            const arm = hand==='left' ? this.boxer.leftArm : this.boxer.rightArm;
+            const fore = hand==='left' ? this.boxer.leftForeArm : this.boxer.rightForeArm;
+            arm.rotation.x = 0.78 - (val * 1.5);
+            fore.rotation.x = 2.09 - (val * 1.5);
+            if(pt >= Math.PI) this.boxer.mesh.userData.punching = null;
+        }
+        this.letterBoxes.forEach(b => {
+            if(b.userData.active) {
+                b.scale.lerp(new THREE.Vector3(1,1,1), 0.1);
+                b.rotation.x += b.userData.rotVelocity.x * delta;
+                b.userData.rotVelocity.multiplyScalar(0.9);
+                b.rotation.x = THREE.MathUtils.lerp(b.rotation.x, 0, 0.1);
+            }
+        });
+        [...this.particles, ...this.confetti].forEach(p => {
+             p.position.add(p.userData.velocity);
+             if(p.userData.life) p.userData.life -= delta;
+        });
+        this.renderer.render(this.scene, this.camera);
+    }
+};
+
+function pickWord() {
+    // *** BOSS BATTLE TRIGGER (15th Word) ***
+    if (roundWins === 14) {
+        startBossRound();
+        return;
+    }
+
+    // Normal Game Loop
+    isBossRound = false;
+    document.body.classList.remove('boss-mode'); // Safety cleanup
+
+    const set = WORD_SETS[levelChoice] || WORD_SETS[1];
+    const bagKey = `sb_wordBag_lvl_${levelChoice}`;
+    
+    // Bag Logic (Same as before)
+    let bag = JSON.parse(localStorage.getItem(bagKey) || '[]');
+    if (bag.length === 0 || bag.some(i => i >= set.length)) {
+        bag = Array.from({length: set.length}, (_, i) => i);
+        bag = shuffle(bag);
+    }
+    const nextIndex = bag.pop();
+    localStorage.setItem(bagKey, JSON.stringify(bag));
+    
+    const data = set[nextIndex];
+    currentWord = data.word.toUpperCase();
+    el.puzzleImage.textContent = data.emoji;
+    
+    renderWord();
+    // *** NEW: Update Background Theme ***
+    document.body.className = `lvl-${levelChoice}`; 
+    // ************************************
+}
+
+// *** NEW FUNCTION: Sets up the Boss Fight ***
+function startBossRound() {
+    isBossRound = true;
+    
+    // 1. Visuals & Audio
+    document.body.classList.add('boss-mode');
+    playSpeech("Warning! End of Level!");
+    flashFeedback("⚠️ BOSS WORD! ⚠️");
+    
+    // 2. Pick a Harder Word (From next level up, or just a hard one)
+    let bossLevel = Math.min(levelChoice + 1, 5);
+    const set = WORD_SETS[bossLevel];
+    
+    // Pick random word from harder set (Don't use bag, just random challenge)
+    const data = set[Math.floor(Math.random() * set.length)];
+    
+    currentWord = data.word.toUpperCase();
+    el.puzzleImage.textContent = data.emoji;
+    
+    renderWord();
 }
 
 function renderWord(){
-  // Clear previous state
-  userAnswer=Array(currentWord.length).fill(null); // Initialize userAnswer array size
-  el.slots.innerHTML=''; 
+  userAnswer=Array(currentWord.length).fill(null);
+  el.slots.innerHTML='';
   el.tiles.innerHTML='';
   
   const letters=currentWord.split('');
+  // Add extra letters for difficulty
   const extras='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').sort(()=>0.5-Math.random()).slice(0,Math.max(0,Math.min(3,Math.floor(letters.length/2))));
   const tiles = shuffle([...letters,...extras]);
 
-  // Render slots
+  // Render Slots (Empty Boxes)
   letters.forEach((l, i)=>{ 
     const s=document.createElement('div'); 
     s.className='slot'; 
@@ -382,253 +713,224 @@ function renderWord(){
     s.addEventListener('click',()=>onSlotClick(s)); 
     el.slots.appendChild(s); 
   });
-  
-  // Render tiles
+
+  // Render Tiles (Colored Letters)
   tiles.forEach((l, i)=>{
     const t=document.createElement('div'); 
-    t.className='letter bg-white/6'; 
+    
+    // *** NEW: Color Logic ***
+    const isVowel = ['A','E','I','O','U'].includes(l);
+    // Apply the class based on the letter type
+    t.className = isVowel ? 'letter vowel' : 'letter consonant';
+    // ************************
+
     t.textContent=l; 
     t.dataset.letter=l;
     t.dataset.originalId = i;
-    // Tile click now places the letter into the first available slot
     t.addEventListener('click',()=>{ onTileClick(t); playSpeech(t.dataset.letter.toLowerCase()); });
     el.tiles.appendChild(t);
   });
-  
+
   el.feedback.textContent='';
   updateHUD();
 }
 
-// *** MODIFIED: Logic to place letter in first available slot (Confirmed fix) ***
 function onTileClick(tile){
   if(tile.style.visibility==='hidden' || isAnimating) return;
-  
-  // Find the index of the first empty slot in the userAnswer array (source of truth)
   const slotIndex = userAnswer.findIndex(l => l === null);
-  
-  if(slotIndex === -1) {
-      flashFeedback("Boxes are full!");
-      return; 
-  }
-  
-  // Use the index to find the corresponding DOM slot
-  const emptySlot = el.slots.children[slotIndex]; 
-
-  // Place the letter
+  if(slotIndex === -1) { flashFeedback("Boxes are full!"); return; }
+  const emptySlot = el.slots.children[slotIndex];
   emptySlot.textContent = tile.dataset.letter;
   emptySlot.dataset.sourceId = tile.dataset.originalId; 
   tile.style.visibility='hidden';
-  userAnswer[slotIndex]=tile.dataset.letter; // Update the source of truth array
-  
-  // Submission is handled exclusively by the submit() function.
+  userAnswer[slotIndex]=tile.dataset.letter;
 }
 
-// *** MODIFIED: Logic to remove letter from slot and return tile ***
 function onSlotClick(slot){
   if(isAnimating) return;
   const i=Number(slot.dataset.index);
   if(slot.textContent){
     const originalId = slot.dataset.sourceId;
     const letter = slot.textContent;
-    
-    // Clear slot
-    slot.textContent=''; 
+    slot.textContent='';
     slot.dataset.sourceId = '';
-    userAnswer[i]=null; // Set back to null
-    
-    // Find the original tile by its stored ID and make it visible
+    userAnswer[i]=null;
     const hidden = Array.from(el.tiles.children).find(t=>t.dataset.originalId === originalId);
     if(hidden) hidden.style.visibility='';
-    
-    // Play sound on retraction (optional, but good feedback)
     playSpeech(letter.toLowerCase());
   }
 }
 
-/* ======================= Submit & Punch ======================= */
-function submit(){
-  const attempt=userAnswer.filter(l=>l).join('');
-  
-  // Check if all slots are filled
-  if(attempt.length!==currentWord.length) {
-      flashFeedback("Fill all the boxes first!");
-      return;
-  }
+function playAnnouncer(currentStreak) {
+    let announcement = '';
+    if (currentStreak === 10) announcement = "Coin Rush initiated!";
+    else if (currentStreak === 15) announcement = "Unstoppable!";
+    else if (currentStreak === 20) announcement = "Legendary streak!";
+    if (announcement) playSpeech(announcement);
+}
 
+function submit(){
+  if(isAnimating) return;
+  const attempt=userAnswer.filter(l=>l).join('');
+  if(attempt.length!==currentWord.length) { flashFeedback("Fill all the boxes first!"); return; }
   if(attempt===currentWord) handleCorrect(); else handleWrong();
 }
 
-// --- NEW FUNCTION: Level Up Handler ---
 function levelUp() {
-    const xpNextGoal = 50; 
-    
-    // Check if player has maxed out (Level 5)
-    if (levelChoice >= 5) {
-        flashFeedback("MAX LEVEL REACHED! You are the Champion!");
-        levelChoice = 5; 
-        xp = xpNextGoal; // Keep XP display full
-        saveStore();
-        updateHUD();
-        return;
+    if (typeof VictoryScene !== 'undefined') { VictoryScene.start(); } else { finishLevelUp(); }
+}
+function finishLevelUp() {
+    roundWins = 0;
+    if (levelChoice < 5) {
+        levelChoice++;
+        localStorage.setItem('wordIndex', 0);
+        if(el.levelSelect) { el.levelSelect.value = levelChoice; }
+        flashFeedback(`LEVEL ${levelChoice} UNLOCKED!`);
+    } else {
+         flashFeedback("MAX LEVEL REACHED!");
     }
-
-    // Level up process
-    levelChoice += 1;
-    xp = xp % xpNextGoal; // Carry over excess XP
-    
-    // Visual Feedback 
-    confetti({ particleCount: 200, spread: 180, origin: { y: 0.5 } });
-    flashFeedback(`LEVEL UP! New Level: ${levelChoice}`);
-
-    // Update level select dropdown to show current level selected
-    el.levelSelect.value = levelChoice;
-
     saveStore();
     updateHUD();
+    isAnimating = false;
+    pickWord(); 
 }
 
 function handleCorrect(){
   isAnimating = true;
+  let baseXP = 5; let bonusXP = 0; let bonusCoins = 0; let baseScore = 10;
+  if (levelChoice >= 3) baseXP = 7;
+  if (levelChoice >= 2) bonusCoins += 1;
+  if (levelChoice >= 5) baseScore += 5;
+  if (currentGlove === 'training') bonusXP += 1;
+  if (currentGlove === 'sparkle') bonusCoins += 1;
+
+  let rushMultiplier = 1; let rushActive = false;
+  if (coinRushCounter > 0) {
+      rushMultiplier = COIN_RUSH_MULTIPLIER;
+      coinRushCounter--;
+      rushActive = true;
+  } else if (streak === 9) { 
+      coinRushCounter = COIN_RUSH_DURATION;
+      rushMultiplier = COIN_RUSH_MULTIPLIER;
+      rushActive = true;
+      playAnnouncer(streak + 1);
+  }
   
-  // --- XP and SCORE Base Calculations ---
-  let baseXP = 5;
-  let bonusXP = 0;
-  let bonusCoins = 0;
-  let baseScore = 10;
-  const xpNextGoal = 50; // XP required for next level
+  let multiplier = 1;
+  if (streak >= 5) multiplier = 1.5;
+  if (streak >= 10) multiplier = 2;
+  if (streak >= 20) multiplier = 4;
+// 2. Coin Calculation
+  let baseCoinReward = 5;
+  let streakBonusCoins = Math.floor(streak / 5); 
+  let totalCoinsEarned = (baseCoinReward + streakBonusCoins + bonusCoins);
   
-  // 1. Apply Level Perks
-  if (levelChoice >= 3) {
-      baseXP = 7; // LVL 3 Perk: XP Multiplier
-  }
-  if (levelChoice >= 2) {
-       bonusCoins += 1; // LVL 2 Perk: Coin Magnet
-  }
-  if (levelChoice >= 5) {
-      baseScore += 5; // LVL 5 Perk: Max Score Bonus
-  }
-  
-  // 2. Apply Glove Perks
-  if (currentGlove === 'training') {
-      bonusXP += 1;
-  }
-  if (currentGlove === 'sparkle') {
-      bonusCoins += 1;
+  if (rushActive) totalCoinsEarned *= COIN_RUSH_MULTIPLIER;
+
+  // *** BOSS REWARD (Triple Coins) ***
+  if (isBossRound) {
+      totalCoinsEarned *= 3;
+      flashFeedback("BOSS DEFEATED! 3x COINS!");
+      playSpeech("Boss Defeated!");
+      document.body.classList.remove('boss-mode'); // Turn off alarms
   }
 
-  // 3. Calculate Score (Base Score * Streak Multiplier)
-  let multiplier = 1 + (streak > 0 ? streak / 2 : 0); // 1x, 1.5x, 2x, 2.5x...
   let gained = Math.round(baseScore * multiplier);
-  
-  if (currentGlove === 'gold' && streak >= 3) {
-      gained += 25; // Gold Glove Perk: Extra points on Streak
-  }
-  
-  score+=gained; 
-  coins+=1 + bonusCoins; 
+  if (currentGlove === 'star') gained = Math.round(baseScore * (1 + (currentWord.length / 2)));
+  if (currentGlove === 'gold' && streak >= 3) { gained += 25; totalCoinsEarned += 5; }
+
+  score += (gained * (rushActive ? rushMultiplier : 1));
+  coins += totalCoinsEarned;
   xp+=(baseXP + bonusXP);
   streak+=1;
-  wordsSpelled+=1; // Increment total words spelled
-  if (streak > maxStreak) maxStreak = streak; // Update max streak
-  
-  // --- VISUAL FEEDBACK TRIGGERS ---
-  // LVL 3 XP Boost Visual
+  wordsSpelled+=1;
+  if (streak > maxStreak) maxStreak = streak;
+  roundWins++;
+
   if (levelChoice >= 3) {
     el.xpContainer.classList.add('xp-flash');
     setTimeout(() => el.xpContainer.classList.remove('xp-flash'), 300);
   }
-
-  // ------------------------------------
-  
-  showPunch(true,gained);
-  
-  // Check for Level Up AFTER awarding XP
-  if (levelChoice < 5 && xp >= xpNextGoal) {
-      levelUp(); 
+  if (xp >= 50) {
+      xp = 0; coins += 50; flashFeedback("RANK UP! +50 COINS!");
   }
   
-  // *** FIXED: Use "HIT!" terminology ***
-  flashFeedback(`HIT! +${gained} pts (x${multiplier.toFixed(1)} streak)`);
-  
+  showPunch(true,gained);
+  correctSound.play().catch(() => {});
+  flashFeedback("HIT!");
   playSpeech(currentWord.toLowerCase()); 
+
+  if (roundWins % 3 === 0 && roundWins < 15) {
+      const praises = ["Great job!", "Fantastic!", "Superb!", "Amazing!", "Well done!", "Incredible!", "You are on fire!", "Spectacular!", "Excellent!"];
+      const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+      setTimeout(() => playSpeech(randomPraise), 800);
+  }
+
   saveStore(); 
   updateHUD(); 
   
-  // Automatic progress after confirmation delay (1500ms)
-  setTimeout(()=>{
-      isAnimating = false; // *** CRITICAL FIX: Release lock BEFORE picking the word ***
-      pickWord();
-  }, 1500);
+  if (roundWins >= 15) {
+      setTimeout(() => {
+          playSpeech("LEVEL UP!"); 
+          levelUp(); 
+      }, 1500);
+  } else {
+      setTimeout(()=>{ isAnimating = false; pickWord(); }, 1500);
+  }
 }
 
 function handleWrong(){
   isAnimating = true;
-  let feedbackMessage = "MISS!";
-  
-  // Apply Combo Retention perk (LVL 4 perk concept implemented via state check)
+  let feedbackMessage = "TRY AGAIN!";
   if (levelChoice >= 4) {
       if (streak > 0) {
-        streak = Math.max(1, streak - 1); // LVL 4 Perk: Drops streak to 1 instead of 0
+        streak = Math.max(1, streak - 1);
         el.streak.classList.add('streak-guard-flash');
         setTimeout(() => el.streak.classList.remove('streak-guard-flash'), 600);
         feedbackMessage = "GUARD! Streak Protected.";
       }
-  } else {
-      streak = 0; // Standard: Lose entire streak
-  }
+  } else { streak = 0; }
+  if (coinRushCounter > 0) { coinRushCounter = 0; feedbackMessage = "RUSH FAILED! Streak Reset."; }
   
   showPunch(false,0); 
-  flashFeedback(feedbackMessage); 
+  wrongSound.play().catch(() => {});
+  flashFeedback(feedbackMessage);
   score=Math.max(0,score-2); 
   saveStore(); 
   updateHUD();
-  
-  setTimeout(() => {
-    isAnimating = false;
-  }, 600); // Release lock after punch animation finishes
+  setTimeout(() => { isAnimating = false; }, 600);
 }
 
-function showPunch(hit,gained){
-  const glove=el.glove, balloon=el.puzzleImage; // Use puzzleImage element
-  glove.classList.remove('punching'); balloon.classList.remove('balloonHit'); // Clear old anims
-  
-  if(hit){
-    glove.classList.add('punching'); balloon.classList.add('balloonHit'); 
-    spawnScorePopup('+'+gained, '#ffb400');
-    // Simplified Sparkle Spawning
-    for(let i=0;i<5;i++){ spawnSpark(); }
-    setTimeout(()=>{ glove.classList.remove('punching'); balloon.classList.remove('balloonHit'); },600);
-  } else { 
-    glove.classList.add('punching'); 
-    spawnScorePopup('Miss!', '#ff4500');
-    setTimeout(()=>{ glove.classList.remove('punching'); },500); 
-  }
+function showPunch(hit, gained) {
+    const glove = el.glove, balloon = el.puzzleImage;
+    glove.classList.remove('punching');
+    balloon.classList.remove('balloonHit');
+
+    if (hit) {
+        glove.classList.add('punching');
+        balloon.classList.add('balloonHit');
+        punchSound.play().catch(() => {});
+        let pColors = ['#ffffff', '#ffb400'];
+        let pShapes = ['square'];
+        if (currentGlove === 'fire') { pColors = ['#ff0000', '#ff4500', '#fbbf24']; pShapes = ['square']; }
+        else if (currentGlove === 'ice') { pColors = ['#a5f3fc', '#ffffff', '#0ea5e9']; pShapes = ['circle']; }
+        else if (currentGlove === 'zombie' || currentGlove === 'slime') { pColors = ['#84cc16', '#3f6212', '#bef264']; pShapes = ['circle']; }
+        else if (currentGlove === 'gold' || currentGlove === 'sparkle') { pColors = ['#FFD700', '#FDB931', '#FFFFFF']; pShapes = ['circle']; }
+        confetti({ particleCount: 30, spread: 60, origin: { y: 0.6 }, colors: pColors, shapes: pShapes, disableForReducedMotion: true });
+        setTimeout(() => { glove.classList.remove('punching'); balloon.classList.remove('balloonHit'); }, 600);
+    } else {
+        glove.classList.add('punching');
+        setTimeout(() => { glove.classList.remove('punching'); }, 500);
+    }
 }
 
-function spawnScorePopup(text, color){
-  const d=document.createElement('div'); 
-  d.className='scorePop'; 
-  d.textContent=text;
-  d.style.color = color || 'white';
-  d.style.left=(40+Math.random()*60)+'%'; 
-  el.scorePopWrap.appendChild(d); 
-  setTimeout(()=>d.remove(),1000);
-}
-
-function spawnSpark(){
-  const s=document.createElement('div'); s.className='sparkle'; s.textContent='✨';
-  s.style.left=(30+Math.random()*40)+'%'; s.style.bottom='40px';
-  el.scorePopWrap.appendChild(s); setTimeout(()=>s.remove(),800);
-}
-
-/* ======================= Progress Functions ======================= */
 function renderProgressModal() {
     el.progressContent.innerHTML = `
         <div class="text-lg font-semibold border-b pb-2 mb-2">Current Status</div>
         <p>Level: <span class="font-bold text-blue-600">LVL ${levelChoice}</span></p>
         <p>XP: <span class="font-bold">${xp} / 50</span></p>
         <p>Current Streak: <span class="font-bold">${streak}</span></p>
-
+        ${coinRushCounter > 0 ? `<p class="text-red-500 font-bold">COIN RUSH ACTIVE: ${coinRushCounter} words left!</p>` : ''}
         <div class="text-lg font-semibold border-b pb-2 pt-4 mb-2">Lifetime Achievements</div>
         <p>Total Score Earned: <span class="font-bold">${score}</span></p>
         <p>Max Streak: <span class="font-bold">${maxStreak}</span></p>
@@ -637,123 +939,100 @@ function renderProgressModal() {
     el.progressModal.style.display = 'flex';
 }
 
-
-/* ======================= Shop Functions ======================= */
-function renderShop(){
+function renderShop() {
     el.shopContent.innerHTML = `
-        <p class="text-xl mb-4 text-black font-bold">Current Coins: ${coins} 💰</p>
-        <div class="grid grid-cols-2 gap-4">
-            ${Object.entries(GLOVE_DATA).map(([id, data]) => {
-                const isOwned = ownedGloves.includes(id);
-                const isEquipped = currentGlove === id;
-                const canAfford = coins >= data.price;
-                
-                let buttonText;
-                let buttonClass;
-                let isDisabled = false;
-
-                if (isEquipped) {
-                    buttonText = 'EQUIPPED';
-                    buttonClass = 'bg-green-600 text-white cursor-default';
-                    isDisabled = true;
-                } else if (isOwned) {
-                    buttonText = 'EQUIP';
-                    buttonClass = 'bg-blue-500 hover:bg-blue-600 text-white';
-                } else if (canAfford) {
-                    buttonText = `BUY (${data.price} 💰)`;
-                    buttonClass = 'bg-amber-500 hover:bg-amber-600 text-black';
-                } else {
-                    buttonText = `NEED ${data.price} 💰`;
-                    buttonClass = 'bg-gray-300 text-gray-500 cursor-not-allowed';
-                    isDisabled = true;
-                }
-
-                return `
-                    <div class="shopItem flex flex-col items-center p-3 text-center border ${isEquipped ? 'border-green-400' : 'border-gray-700'}">
-                        <div class="text-4xl mb-2">${data.emoji}</div>
-                        <p class="font-bold">${data.name}</p>
-                        <p class="text-sm text-gray-700 mb-2">${data.perk}</p>
-                        <button 
-                            class="w-full text-sm py-2 rounded font-semibold mt-auto ${buttonClass}"
-                            ${isDisabled ? 'disabled' : ''}
-                            onclick="handleShopAction('${id}', ${data.price}, ${isOwned})"
-                        >
-                            ${buttonText}
-                        </button>
-                    </div>
-                `;
-            }).join('')}
+        <div class="flex gap-2 mb-4 border-b border-gray-600 pb-2">
+            <button onclick="switchTab('gloves')" class="flex-1 py-2 rounded-t-lg font-bold text-lg ${shopTab === 'gloves' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'}">🥊 Gloves</button>
+            <button onclick="switchTab('stickers')" class="flex-1 py-2 rounded-t-lg font-bold text-lg ${shopTab === 'stickers' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-400'}">📒 Stickers</button>
         </div>
+        <div id="shopInnerContent" class="h-[50vh] overflow-y-auto pr-2"></div>
     `;
-    el.shopModal.classList.remove('hidden');
-    el.shopModal.classList.add('flex');
+    const inner = document.getElementById('shopInnerContent');
+    if (shopTab === 'gloves') { renderGloves(inner); } else { renderStickers(inner); }
+    el.shopModal.classList.remove('hidden'); el.shopModal.classList.add('flex');
 }
 
+function renderGloves(container) {
+    const powerUpIDs = ['training', 'sparkle', 'gold'];
+    const vanityIDs = Object.keys(GLOVE_DATA).filter(id => !powerUpIDs.includes(id) && id !== 'base');
+    const makeCard = (id) => {
+        const data = GLOVE_DATA[id];
+        const owned = ownedGloves.includes(id);
+        const equipped = currentGlove === id;
+        let btnStr = owned ? (equipped ? "EQUIPPED" : "EQUIP") : `BUY ${data.price}💰`;
+        let btnCls = owned ? (equipped ? "bg-green-600 cursor-default" : "bg-blue-500 hover:bg-blue-400") : (coins >= data.price ? "bg-amber-500 hover:bg-amber-400" : "bg-gray-600 cursor-not-allowed");
+        return `
+        <div class="bg-white/5 p-3 rounded-xl flex flex-col items-center border border-white/10 relative group hover:border-white/30 transition mb-2">
+            <div class="text-5xl mb-2 transform group-hover:scale-110 transition">${data.emoji}</div>
+            <div class="font-bold text-white text-md">${data.name}</div>
+            <div class="text-xs text-gray-400 mb-2 font-bold uppercase">${data.perk}</div>
+            <button onclick="handleShopAction('${id}', ${data.price}, ${owned})" class="w-full py-2 rounded-lg font-black text-white text-xs shadow-md ${btnCls}" ${(!owned && coins < data.price) ? 'disabled' : ''}>${btnStr}</button>
+        </div>`;
+    };
+    let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3"><h3 class="col-span-full text-xl font-black text-yellow-400 border-b-2 border-yellow-400/20 pb-1 mb-2 mt-1">⚡ POWER UPS</h3>`;
+    html += powerUpIDs.map(id => makeCard(id)).join('');
+    html += `<h3 class="col-span-full text-xl font-black text-purple-400 border-b-2 border-purple-400/20 pb-1 mb-2 mt-6">🎭 COOL STYLES</h3>`;
+    html += vanityIDs.map(id => makeCard(id)).join('');
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function renderStickers(container) {
+    if (!STICKER_DATA) { container.innerHTML = '<div class="text-center text-gray-500">Sticker data missing!</div>'; return; }
+    let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">`;
+    html += Object.entries(STICKER_DATA).map(([id, data]) => {
+        const owned = ownedStickers.includes(id);
+        const btnClass = owned ? 'bg-gray-600 cursor-default' : (coins >= data.price ? 'bg-purple-500 hover:bg-purple-400' : 'bg-gray-700 cursor-not-allowed');
+        const btnText = owned ? 'OWNED' : `BUY ${data.price}💰`;
+        return `
+        <div class="bg-white/5 p-3 rounded-xl flex flex-col items-center border border-white/10">
+            <div class="text-5xl mb-2">${data.emoji}</div>
+            <div class="font-bold text-white">${data.name}</div>
+            <button class="w-full mt-2 rounded-lg py-2 font-bold text-xs text-white ${btnClass}" onclick="buySticker('${id}')" ${owned?'disabled':''}>${btnText}</button>
+        </div>`;
+    }).join('');
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+window.switchTab = function(tab) { shopTab = tab; renderShop(); };
 window.handleShopAction = (gloveId, price, isOwned) => {
     if (isOwned === true) {
         currentGlove = gloveId;
         playSpeech(`${GLOVE_DATA[gloveId].name} equipped!`);
-        updateHUD();
-        saveStore();
-        renderShop(); // Re-render to show equipped status
+        updateHUD(); saveStore(); renderShop();
     } else if (coins >= price) {
         coins -= price;
         ownedGloves.push(gloveId);
         currentGlove = gloveId;
         playSpeech(`Purchased and equipped ${GLOVE_DATA[gloveId].name}!`);
-        updateHUD();
-        saveStore();
-        renderShop(); // Re-render to update coin count and buttons
-    } else {
-        playSpeech("Not enough coins!");
-    }
+        updateHUD(); saveStore(); renderShop();
+    } else { playSpeech("Not enough coins!"); }
 };
 
-/* ======== Keyboard Support (Minor cleanup) ======== */
 document.addEventListener('keydown', e=>{
   if (isAnimating) return;
   if(e.key==='Backspace'){ 
-    e.preventDefault(); // Stop browser back action
-    // Find the last filled index
+    e.preventDefault();
     const lastFilledIndex = [...userAnswer].reverse().findIndex(l => l !== null);
-    if (lastFilledIndex !== -1) {
-        // Translate reversed index back to normal index
-        const index = currentWord.length - 1 - lastFilledIndex;
-        onSlotClick(el.slots.children[index]); 
-    }
+    if (lastFilledIndex !== -1) { onSlotClick(el.slots.children[currentWord.length - 1 - lastFilledIndex]); }
   }
-  else if(e.key==='Enter'){ 
-    e.preventDefault(); // Stop browser default enter action
-    submit();
-  }
+  else if(e.key==='Enter'){ e.preventDefault(); submit(); }
   else if(/^[a-zA-Z]$/.test(e.key)){ 
-    e.preventDefault(); // Prevent accidental scrolling/typing outside
+    e.preventDefault();
     const letter=e.key.toUpperCase(); 
-    // Find the tile that corresponds to the key press AND is currently visible
     const tile=Array.from(el.tiles.children).find(t=>t.dataset.letter===letter && t.style.visibility!=='hidden'); 
-    if(tile) {
-      onTileClick(tile); 
-      playSpeech(letter.toLowerCase()); // Use lowercase for better pronunciation
-    }
+    if(tile) { onTileClick(tile); playSpeech(letter.toLowerCase()); }
   }
 });
 
-/* ======== Button Events ======== */
-// Click button says the whole word
 el.emojiBtn.addEventListener('click',()=>playSpeech(currentWord.toLowerCase()));
 el.submit.addEventListener('click',submit);
 el.newBtn.addEventListener('click',pickWord);
-el.shopBtn.addEventListener('click', renderShop); // Open the shop modal
-el.closeShop.addEventListener('click', () => { // Close the shop modal
-    el.shopModal.classList.add('hidden');
-    el.shopModal.classList.remove('flex');
-});
+el.shopBtn.addEventListener('click', renderShop);
+el.closeShop.addEventListener('click', () => { el.shopModal.classList.add('hidden'); el.shopModal.classList.remove('flex'); });
 el.statsHeader.addEventListener('click', renderProgressModal);
-el.closeProgressModal.addEventListener('click', () => {
-    el.progressModal.style.display = 'none';
-});
-
-// --- Theme Toggle Functionality ---
+el.closeProgressModal.addEventListener('click', () => { el.progressModal.style.display = 'none'; });
 el.themeToggle.addEventListener('click', () => {
     const body = document.body;
     const currentTheme = body.getAttribute('data-theme') || 'light';
@@ -761,55 +1040,216 @@ el.themeToggle.addEventListener('click', () => {
     body.setAttribute('data-theme', newTheme);
     localStorage.setItem('sb_theme', newTheme);
 });
-
-/* ======== Level select ======== */
 el.levelSelect.value=levelChoice;
-el.levelSelect.addEventListener('change',e=>{ 
-    levelChoice=parseInt(e.target.value); 
-    localStorage.setItem('sb_level',levelChoice); 
-    localStorage.setItem('wordIndex', 0); // *** IMPORTANT: Reset word index when level changes ***
-    pickWord(); 
-});
+el.levelSelect.addEventListener('change',e=>{ levelChoice=parseInt(e.target.value); localStorage.setItem('sb_level',levelChoice); localStorage.setItem('wordIndex', 0); pickWord(); });
 
-/* ======== Utils ======== */
 function flashFeedback(t){ el.feedback.textContent=t; setTimeout(()=>{ if(el.feedback.textContent===t) el.feedback.textContent=''; },1500); }
-function saveStore(){ 
-  // Save current XP/Level Choice to maintain leveling progression across sessions
-  localStorage.setItem('spellingBalloon_v2',JSON.stringify({coins,score,xp,streak,maxStreak, wordsSpelled, currentGlove, ownedGloves, levelChoice})); 
-}
+function saveStore(){ localStorage.setItem('spellingBalloon_v2',JSON.stringify({ coins, score, xp, streak, maxStreak, wordsSpelled, currentGlove, ownedGloves, levelChoice, coinRushCounter, roundWins, ownedStickers, placedStickers })); }
 function updateHUD(){ 
   const xpNextGoal = 50;
-  el.score.textContent=`Score: ${score}`; 
-  el.coins.textContent=coins; 
-  el.xp.textContent=xp; 
-  el.xpNext.textContent=xpNextGoal;
-  el.streak.textContent=streak; 
-  el.glove.textContent = GLOVE_DATA[currentGlove].emoji;
-  
-  // Update Level Display
-  if(el.levelDisplay) el.levelDisplay.textContent = `LVL ${levelChoice}`; 
-
-  // *** VISUAL PERK: LVL 2 Coin Magnet ***
-  if (levelChoice >= 2) {
-      el.coins.classList.add('gold-boost');
-  } else {
-      el.coins.classList.remove('gold-boost');
-  }
-
-  // *** VISUAL PERK: LVL 4 Combo Guard ***
-  if (levelChoice >= 4) {
-      el.streak.classList.add('streak-guard');
-  } else {
-      el.streak.classList.remove('streak-guard');
+  el.score.textContent=`Score: ${score}`; el.coins.textContent=coins; el.xp.textContent=xp; el.xpNext.textContent=xpNextGoal; el.streak.textContent=streak; el.glove.textContent = GLOVE_DATA[currentGlove].emoji;
+  if(el.levelDisplay) el.levelDisplay.textContent = `LVL ${levelChoice}`;
+  if (levelChoice >= 2) { el.coins.classList.add('gold-boost'); } else { el.coins.classList.remove('gold-boost'); }
+  if (levelChoice >= 4) { el.streak.classList.add('streak-guard'); } else { el.streak.classList.remove('streak-guard'); }
+  const maxCombo = 20;
+  const percentage = Math.min((streak / maxCombo) * 100, 100);
+  const bar = document.getElementById('streakBar');
+  if(bar) { 
+      bar.style.width = percentage + '%';
+      if (streak >= 10) { bar.classList.add('animate-pulse'); bar.parentElement.style.boxShadow = '0 0 15px #ff4500'; bar.parentElement.style.borderColor = '#ff4500'; } 
+      else { bar.classList.remove('animate-pulse'); bar.parentElement.style.boxShadow = 'none'; bar.parentElement.style.borderColor = '#4b5563'; }
   }
 }
 
-/* ======== Init ======== */
-// Load theme preference
-document.body.setAttribute('data-theme', localStorage.getItem('sb_theme') || 'dark');
+// Sticker Logic
+if(el.stickerBtn) el.stickerBtn.addEventListener('click', openStickerBook);
+if(el.closeStickerModal) el.closeStickerModal.addEventListener('click', () => { el.stickerModal.style.display = 'none'; });
+let selectedStickerIndex = null;
+function openStickerBook() { el.stickerModal.style.display = 'flex'; renderStickerDrawer(); renderPlacedStickers(); }
+function renderStickerDrawer() {
+    const drawer = el.stickerDrawer;
+    if (ownedStickers.length === 0) { drawer.innerHTML = '<div class="w-full text-center text-gray-500 font-bold text-xl">Go to Shop to buy stickers!</div>'; return; }
+    drawer.innerHTML = ownedStickers.map(id => `
+        <div class="min-w-[80px] h-[80px] bg-white/10 rounded-xl flex items-center justify-center text-5xl cursor-pointer hover:bg-white/20 hover:scale-110 transition shadow-lg border-2 border-white/5 active:scale-95" onclick="placeSticker('${id}')">${STICKER_DATA[id].emoji}</div>
+    `).join('');
+}
+window.buySticker = (id) => {
+    const data = STICKER_DATA[id];
+    if(coins >= data.price && !ownedStickers.includes(id)) { coins -= data.price; ownedStickers.push(id); playSpeech("New Sticker!"); saveStore(); updateHUD(); renderShop(); } 
+    else if (ownedStickers.includes(id)) { playSpeech("You own this!"); } else { playSpeech("Not enough coins"); }
+};
+window.placeSticker = (id) => {
+    // 1. CHECK: Is this sticker already on the canvas?
+    const alreadyExists = placedStickers.some(s => s.id === id);
+    
+    if (alreadyExists) {
+        playSpeech("Already here!"); // Feedback
+        
+        // Optional: Find it and shake it/highlight it so they see it
+        const index = placedStickers.findIndex(s => s.id === id);
+        selectedStickerIndex = index; // Auto-select the existing one
+        renderPlacedStickers(); 
+        return; // STOP here. Do not create a new one.
+    }
 
-// *** NOTE: The core gameplay loop is now fixed to use and advance the 'wordIndex' in localStorage. ***
+    // 2. If not found, create it (The original code)
+    placedStickers.push({
+        id: id, 
+        emoji: STICKER_DATA[id].emoji, 
+        x: 40 + (Math.random() * 20), 
+        y: 40 + (Math.random() * 20), 
+        size: 5 
+    });
+    
+    playSpeech("Pop!"); 
+    saveStore(); 
+    renderPlacedStickers();
+};
+function renderPlacedStickers() {
+    const canvas = el.stickerCanvas;
+    // Clear old items (keep grid and controls)
+    const oldItems = canvas.querySelectorAll('.sticker-item, #stickerControls');
+    oldItems.forEach(e => e.remove());
+
+    // --- TOOLBAR LOGIC ---
+    if(selectedStickerIndex !== null) {
+        const bar = document.createElement('div');
+        bar.id = 'stickerControls';
+        // Float slightly ABOVE the selection
+        bar.className = 'absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-900 p-2 rounded-2xl flex gap-3 shadow-2xl z-[100] border-2 border-white/20';
+        bar.innerHTML = `
+            <button onclick="modSticker('shrink')" class="w-12 h-12 bg-blue-600 active:bg-blue-500 rounded-xl text-2xl shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1">➖</button>
+            <button onclick="modSticker('grow')" class="w-12 h-12 bg-green-600 active:bg-green-500 rounded-xl text-2xl shadow-lg border-b-4 border-green-800 active:border-b-0 active:translate-y-1">➕</button>
+            <div class="w-[2px] bg-gray-600 mx-1"></div>
+            <button onclick="modSticker('del')" class="w-12 h-12 bg-red-600 active:bg-red-500 rounded-xl text-2xl shadow-lg border-b-4 border-red-800 active:border-b-0 active:translate-y-1">🗑️</button>
+            <button onclick="modSticker('close')" class="w-12 h-12 bg-gray-600 active:bg-gray-500 rounded-xl text-xl shadow-lg border-b-4 border-gray-800 active:border-b-0 active:translate-y-1">✖️</button>
+        `;
+        canvas.appendChild(bar);
+    }
+
+    // --- RENDER STICKERS ---
+    placedStickers.forEach((s, index) => {
+        const d = document.createElement('div');
+        d.className = 'sticker-item';
+        d.textContent = s.emoji;
+        d.style.left = s.x + '%';
+        d.style.top = s.y + '%';
+        d.style.fontSize = s.size + 'rem';
+        d.style.zIndex = index + 10;
+        d.style.transform = 'translate(-50%, -50%)';
+        
+        // Highlight selection
+        if(index === selectedStickerIndex) {
+            d.style.border = '3px dashed #ffb400';
+            d.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            d.style.borderRadius = '12px';
+            d.style.zIndex = 50; 
+        }
+
+        // Touch/Click to Select
+        d.onmousedown = (e) => startDrag(e, index);
+        d.ontouchstart = (e) => startDrag(e, index);
+        
+        canvas.appendChild(d);
+    });
+}
+window.modSticker = (action) => {
+    if(action === 'close') { selectedStickerIndex = null; renderPlacedStickers(); return; }
+    if(selectedStickerIndex === null) return;
+    const s = placedStickers[selectedStickerIndex];
+    if(action === 'grow') { s.size = Math.min(s.size+1, 12); playSpeech("Big"); }
+    if(action === 'shrink') { s.size = Math.max(s.size-1, 2); playSpeech("Small"); }
+    if(action === 'del') { placedStickers.splice(selectedStickerIndex, 1); selectedStickerIndex = null; playSpeech("Deleted"); }
+    saveStore(); renderPlacedStickers();
+};
+let dragIdx = null;
+function startDrag(e, index) {
+    if(e.type === 'touchstart') e.preventDefault();
+    selectedStickerIndex = index; renderPlacedStickers();
+    dragIdx = index;
+    const moveHandler = (ev) => {
+        if (dragIdx === null) return;
+        const rect = el.stickerCanvas.getBoundingClientRect();
+        const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+        const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+        let newX = ((clientX - rect.left) / rect.width) * 100;
+        let newY = ((clientY - rect.top) / rect.height) * 100;
+        placedStickers[dragIdx].x = newX; placedStickers[dragIdx].y = newY;
+        renderPlacedStickers();
+    };
+    const upHandler = () => { dragIdx = null; saveStore(); document.removeEventListener('mousemove', moveHandler); document.removeEventListener('mouseup', upHandler); document.removeEventListener('touchmove', moveHandler); document.removeEventListener('touchend', upHandler); };
+    document.addEventListener('mousemove', moveHandler); document.addEventListener('mouseup', upHandler); document.addEventListener('touchmove', moveHandler, { passive: false }); document.addEventListener('touchend', upHandler);
+}
+if(el.stickerCanvas) { el.stickerCanvas.addEventListener('mousedown', (e) => { if(e.target === el.stickerCanvas || e.target.classList.contains('absolute')) { selectedStickerIndex = null; renderPlacedStickers(); } }); el.stickerCanvas.addEventListener('touchstart', (e) => { if(e.target === el.stickerCanvas || e.target.classList.contains('absolute')) { selectedStickerIndex = null; renderPlacedStickers(); } }); }
+
+// Init
+document.body.setAttribute('data-theme', localStorage.getItem('sb_theme') || 'dark');
 pickWord(); updateHUD(); saveStore();
+const introScreen = document.getElementById('introScreen');
+const startBtn = document.getElementById('startGameBtn');
+if(startBtn) {
+    startBtn.addEventListener('click', () => {
+        playSpeech("Let's get ready to rumble!");
+        if(typeof confetti === 'function') { confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, colors: ['#FFD700', '#FF0000', '#FFFFFF'] }); }
+        introScreen.style.opacity = '0'; introScreen.style.pointerEvents = 'none'; 
+        setTimeout(() => { introScreen.style.display = 'none'; pickWord(); }, 500);
+    });
+}
+// Loot Box Logic
+const lootOverlay = document.getElementById('lootOverlay');
+const lootCrate = document.getElementById('lootCrate');
+const lootRewards = document.getElementById('lootRewards');
+const lootItems = document.getElementById('lootItems');
+const collectBtn = document.getElementById('collectLootBtn');
+let crateClicks = 0;
+const CLICKS_TO_OPEN = 5;
+if (lootOverlay && lootCrate && collectBtn) {
+    lootCrate.addEventListener('click', () => {
+        crateClicks++;
+        lootCrate.classList.remove('crate-shake'); void lootCrate.offsetWidth; lootCrate.classList.add('crate-shake');
+        playSpeech("Thud!");
+        if (crateClicks >= CLICKS_TO_OPEN) { openCrate(); }
+    });
+    collectBtn.addEventListener('click', () => {
+        lootOverlay.classList.add('hidden'); lootOverlay.classList.remove('flex');
+        if(typeof finishLevelUp === 'function') { finishLevelUp(); } else { isAnimating = false; pickWord(); }
+    });
+}
+function triggerLootBox() {
+    if (!lootOverlay || !lootCrate) { if(typeof finishLevelUp === 'function') finishLevelUp(); return; }
+    lootOverlay.classList.remove('hidden'); lootOverlay.classList.add('flex');
+    crateClicks = 0; lootCrate.style.display = 'block'; lootRewards.classList.add('hidden'); lootRewards.classList.remove('flex');
+    lootCrate.textContent = '📦'; lootCrate.classList.remove('crate-shake');
+    lootCrate.classList.remove('crate-drop'); void lootCrate.offsetWidth; lootCrate.classList.add('crate-drop');
+    playSpeech("Loot Crate!");
+}
+function openCrate() {
+    lootCrate.style.display = 'none'; lootRewards.classList.remove('hidden'); lootRewards.classList.add('flex');
+    playSpeech("Jackpot!");
+    if(typeof confetti === 'function') { confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } }); }
+    let rewardsHTML = '';
+    for(let i=0; i<3; i++) {
+        const isCoin = Math.random() > 0.5;
+        if(isCoin) {
+            coins += 50;
+            rewardsHTML += `<div class="bg-slate-800 p-4 rounded-xl border-2 border-yellow-500 text-center w-24"><div class="text-4xl">💰</div><div class="text-white font-bold text-sm">+50</div></div>`;
+        } else {
+            if (typeof STICKER_DATA !== 'undefined') {
+                const stickerKeys = Object.keys(STICKER_DATA);
+                const randId = stickerKeys[Math.floor(Math.random() * stickerKeys.length)];
+                const sticker = STICKER_DATA[randId];
+                if(!ownedStickers.includes(randId)) {
+                    ownedStickers.push(randId);
+                    rewardsHTML += `<div class="bg-slate-800 p-4 rounded-xl border-2 border-purple-500 text-center w-24"><div class="text-4xl">${sticker.emoji}</div><div class="text-white font-bold text-sm">NEW!</div></div>`;
+                } else {
+                    coins += 25; rewardsHTML += `<div class="bg-slate-800 p-4 rounded-xl border-2 border-gray-500 text-center w-24"><div class="text-4xl">💰</div><div class="text-white font-bold text-sm">+25</div></div>`;
+                }
+            }
+        }
+    }
+    lootItems.innerHTML = rewardsHTML; saveStore(); updateHUD();
+}
+
 </script>
 </body>
 </html>
