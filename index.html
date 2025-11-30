@@ -256,20 +256,20 @@ const WORD_SETS = {
 };
 
 const GLOVE_DATA = {
-    'base': { name: 'Red Boxer', emoji: '🥊', price: 0, perk: 'None' },
-    'training': { name: 'Karate', emoji: '🥋', price: 15, perk: '+1 XP per word' },
-    'sparkle': { name: 'Sparkle', emoji: '✨', price: 40, perk: '+1 Coin per word' },
-    'robot': { name: 'Robo-Grip', emoji: '🦾', price: 10, perk: 'Just for looks!' },
-    'zombie': { name: 'Zombie Hand', emoji: '🧟', price: 10, perk: 'Just for looks!' },
-    'alien': { name: 'Alien Claw', emoji: '👽', price: 10, perk: 'Just for looks!' },
-    'princess': { name: 'Royal Wave', emoji: '👋', price: 20, perk: 'Just for looks!' },
-    'skeleton': { name: 'Bone Hand', emoji: '💀', price: 15, perk: 'Just for looks!' },
-    'cat': { name: 'Kitty Paw', emoji: '🐾', price: 20, perk: 'Meow!' },
-    'ice': { name: 'Ice Breaker', emoji: '🧊', price: 25, perk: 'So Cool!' },
-    'fire': { name: 'Fireball', emoji: '🔥', price: 25, perk: 'Super Hot!' },
-    'cactus': { name: 'Prickly', emoji: '🌵', price: 15, perk: 'Don\'t touch!' },
+    'base': { name: 'Red Boxer', emoji: '🥊', price: 0, perk: 'Classic Style' },
+    'training': { name: 'Karate', emoji: '🥋', price: 15, perk: 'Earns Extra XP!' },
+    'sparkle': { name: 'Sparkle', emoji: '✨', price: 40, perk: 'Earns Extra Coins!' },
+    'robot': { name: 'Robo-Grip', emoji: '🦾', price: 10, perk: 'Visual Effect' },
+    'zombie': { name: 'Zombie', emoji: '🧟', price: 10, perk: 'Ooze Effect' },
+    'alien': { name: 'Alien', emoji: '👽', price: 10, perk: 'Visual Effect' },
+    'princess': { name: 'Royal Wave', emoji: '👋', price: 20, perk: 'Visual Effect' },
+    'skeleton': { name: 'Bone Hand', emoji: '💀', price: 15, perk: 'Visual Effect' },
+    'cat': { name: 'Kitty Paw', emoji: '🐾', price: 20, perk: 'Meow Sound!' },
+    'ice': { name: 'Ice Breaker', emoji: '🧊', price: 25, perk: 'Ice Explosion!' },
+    'fire': { name: 'Fireball', emoji: '🔥', price: 25, perk: 'Fire Explosion!' },
+    'cactus': { name: 'Prickly', emoji: '🌵', price: 15, perk: 'Visual Effect' },
     'crab': { name: 'Crab Pinch', emoji: '🦀', price: 20, perk: 'Snip Snip!' },
-    'gold': { name: 'Gold Glove', emoji: '🥇', price: 150, perk: 'Big Score Bonus!' },
+    'gold': { name: 'Gold Glove', emoji: '🥇', price: 150, perk: 'HUGE Score Bonus!' },
 };
 
 const STICKER_DATA = {
@@ -797,14 +797,17 @@ function finishLevelUp() {
 
 function handleCorrect(){
   isAnimating = true;
-  let baseXP = 5; let bonusXP = 0; let bonusCoins = 0; let baseScore = 10;
+  let baseXP = 5; let bonusXP = 0;
+  let bonusCoins = 0; let baseScore = 10;
+  
   if (levelChoice >= 3) baseXP = 7;
   if (levelChoice >= 2) bonusCoins += 1;
   if (levelChoice >= 5) baseScore += 5;
   if (currentGlove === 'training') bonusXP += 1;
   if (currentGlove === 'sparkle') bonusCoins += 1;
 
-  let rushMultiplier = 1; let rushActive = false;
+  let rushMultiplier = 1;
+  let rushActive = false;
   if (coinRushCounter > 0) {
       rushMultiplier = COIN_RUSH_MULTIPLIER;
       coinRushCounter--;
@@ -820,7 +823,8 @@ function handleCorrect(){
   if (streak >= 5) multiplier = 1.5;
   if (streak >= 10) multiplier = 2;
   if (streak >= 20) multiplier = 4;
-// 2. Coin Calculation
+
+  // 2. Coin Calculation
   let baseCoinReward = 5;
   let streakBonusCoins = Math.floor(streak / 5); 
   let totalCoinsEarned = (baseCoinReward + streakBonusCoins + bonusCoins);
@@ -832,8 +836,22 @@ function handleCorrect(){
       totalCoinsEarned *= 3;
       flashFeedback("BOSS DEFEATED! 3x COINS!");
       playSpeech("Boss Defeated!");
-      document.body.classList.remove('boss-mode'); // Turn off alarms
+      document.body.classList.remove('boss-mode');
   }
+
+  // *** NEW: CRITICAL HIT MECHANIC (10% Chance) ***
+  let isCrit = Math.random() < 0.10; // 10% chance
+  if (isCrit && !isBossRound) { // Don't override boss text
+      totalCoinsEarned *= 2;
+      multiplier *= 2;
+      flashFeedback("CRITICAL HIT! x2");
+      // Heavy screen shake
+      document.body.style.animation = 'shakeHard 0.5s'; 
+      setTimeout(() => document.body.style.animation = '', 500);
+  } else if (!isBossRound) {
+      flashFeedback("HIT!");
+  }
+  // **********************************************
 
   let gained = Math.round(baseScore * multiplier);
   if (currentGlove === 'star') gained = Math.round(baseScore * (1 + (currentWord.length / 2)));
@@ -852,13 +870,17 @@ function handleCorrect(){
     setTimeout(() => el.xpContainer.classList.remove('xp-flash'), 300);
   }
   if (xp >= 50) {
-      xp = 0; coins += 50; flashFeedback("RANK UP! +50 COINS!");
+      xp = 0;
+      coins += 50; flashFeedback("RANK UP! +50 COINS!");
   }
   
   showPunch(true,gained);
   correctSound.play().catch(() => {});
-  flashFeedback("HIT!");
-  playSpeech(currentWord.toLowerCase()); 
+  
+  // Only say the word if it wasn't a special glove sound (to prevent overlapping audio)
+  if(!['cat','robot','zombie','alien','princess'].includes(currentGlove)) {
+      playSpeech(currentWord.toLowerCase());
+  }
 
   if (roundWins % 3 === 0 && roundWins < 15) {
       const praises = ["Great job!", "Fantastic!", "Superb!", "Amazing!", "Well done!", "Incredible!", "You are on fire!", "Spectacular!", "Excellent!"];
@@ -867,7 +889,7 @@ function handleCorrect(){
   }
 
   saveStore(); 
-  updateHUD(); 
+  updateHUD();
   
   if (roundWins >= 15) {
       setTimeout(() => {
@@ -909,14 +931,37 @@ function showPunch(hit, gained) {
     if (hit) {
         glove.classList.add('punching');
         balloon.classList.add('balloonHit');
-        punchSound.play().catch(() => {});
+        
+        // --- 1. SPECIAL GLOVE SOUNDS ---
+        // We delay the standard punch sound slightly if a special sound plays
+        let delayPunch = false;
+        
+        if (currentGlove === 'cat') { playSpeech("Meow!"); delayPunch = true; }
+        else if (currentGlove === 'robot') { playSpeech("Beep Boop!"); delayPunch = true; }
+        else if (currentGlove === 'zombie' || currentGlove === 'slime') { playSpeech("Brains..."); delayPunch = true; }
+        else if (currentGlove === 'alien') { playSpeech("Zap!"); delayPunch = true; }
+        else if (currentGlove === 'princess') { playSpeech("Hi!"); delayPunch = true; }
+        else {
+            // Standard punch for everyone else
+            punchSound.play().catch(() => {});
+        }
+        
+        // If we played a voice, play the punch sound very quietly or delayed
+        if(delayPunch) {
+             setTimeout(() => punchSound.play().catch(() => {}), 300);
+        }
+        // -------------------------------
+
+        // --- 2. PARTICLE EFFECTS ---
         let pColors = ['#ffffff', '#ffb400'];
         let pShapes = ['square'];
         if (currentGlove === 'fire') { pColors = ['#ff0000', '#ff4500', '#fbbf24']; pShapes = ['square']; }
         else if (currentGlove === 'ice') { pColors = ['#a5f3fc', '#ffffff', '#0ea5e9']; pShapes = ['circle']; }
         else if (currentGlove === 'zombie' || currentGlove === 'slime') { pColors = ['#84cc16', '#3f6212', '#bef264']; pShapes = ['circle']; }
         else if (currentGlove === 'gold' || currentGlove === 'sparkle') { pColors = ['#FFD700', '#FDB931', '#FFFFFF']; pShapes = ['circle']; }
+        
         confetti({ particleCount: 30, spread: 60, origin: { y: 0.6 }, colors: pColors, shapes: pShapes, disableForReducedMotion: true });
+        
         setTimeout(() => { glove.classList.remove('punching'); balloon.classList.remove('balloonHit'); }, 600);
     } else {
         glove.classList.add('punching');
@@ -940,13 +985,29 @@ function renderProgressModal() {
 }
 
 function renderShop() {
+    // 1. Theme the Modal Window (Magical Night Look)
+    const modalBox = el.shopContent.parentElement;
+    modalBox.style.background = 'linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%)'; // Deep Indigo to Dark Slate
+    modalBox.style.border = '4px solid #4f46e5'; // Indigo Border
+    modalBox.style.boxShadow = '0 0 40px rgba(79, 70, 229, 0.4)'; // Glow
+    modalBox.style.color = 'white';
+
+    // 2. Render Tabs & Content
     el.shopContent.innerHTML = `
-        <div class="flex gap-2 mb-4 border-b border-gray-600 pb-2">
-            <button onclick="switchTab('gloves')" class="flex-1 py-2 rounded-t-lg font-bold text-lg ${shopTab === 'gloves' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'}">🥊 Gloves</button>
-            <button onclick="switchTab('stickers')" class="flex-1 py-2 rounded-t-lg font-bold text-lg ${shopTab === 'stickers' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-400'}">📒 Stickers</button>
+        <div class="flex gap-2 mb-6 bg-black/20 p-1 rounded-2xl">
+            <button onclick="switchTab('gloves')" 
+                class="flex-1 py-3 rounded-xl font-black text-lg transition-all duration-200 ${shopTab === 'gloves' ? 'bg-indigo-500 text-white shadow-lg scale-100' : 'text-gray-400 hover:text-white hover:bg-white/5'}">
+                🥊 GLOVES
+            </button>
+            <button onclick="switchTab('stickers')" 
+                class="flex-1 py-3 rounded-xl font-black text-lg transition-all duration-200 ${shopTab === 'stickers' ? 'bg-purple-500 text-white shadow-lg scale-100' : 'text-gray-400 hover:text-white hover:bg-white/5'}">
+                📒 STICKERS
+            </button>
         </div>
-        <div id="shopInnerContent" class="h-[50vh] overflow-y-auto pr-2"></div>
+        
+        <div id="shopInnerContent" class="h-[50vh] overflow-y-auto pr-2 custom-scrollbar"></div>
     `;
+
     const inner = document.getElementById('shopInnerContent');
     if (shopTab === 'gloves') { renderGloves(inner); } else { renderStickers(inner); }
     el.shopModal.classList.remove('hidden'); el.shopModal.classList.add('flex');
@@ -955,40 +1016,65 @@ function renderShop() {
 function renderGloves(container) {
     const powerUpIDs = ['training', 'sparkle', 'gold'];
     const vanityIDs = Object.keys(GLOVE_DATA).filter(id => !powerUpIDs.includes(id) && id !== 'base');
+    
     const makeCard = (id) => {
         const data = GLOVE_DATA[id];
         const owned = ownedGloves.includes(id);
         const equipped = currentGlove === id;
+        
+        // Dynamic Button Colors
         let btnStr = owned ? (equipped ? "EQUIPPED" : "EQUIP") : `BUY ${data.price}💰`;
-        let btnCls = owned ? (equipped ? "bg-green-600 cursor-default" : "bg-blue-500 hover:bg-blue-400") : (coins >= data.price ? "bg-amber-500 hover:bg-amber-400" : "bg-gray-600 cursor-not-allowed");
+        let btnCls = owned ? 
+            (equipped ? "bg-green-500 text-white ring-2 ring-green-300" : "bg-indigo-600 hover:bg-indigo-500 text-white") : 
+            (coins >= data.price ? "bg-yellow-400 hover:bg-yellow-300 text-black shadow-[0_4px_0_rgb(180,83,9)] active:translate-y-1 active:shadow-none" : "bg-gray-700 text-gray-500 cursor-not-allowed");
+            
+        // Glassmorphism Card Style
         return `
-        <div class="bg-white/5 p-3 rounded-xl flex flex-col items-center border border-white/10 relative group hover:border-white/30 transition mb-2">
-            <div class="text-5xl mb-2 transform group-hover:scale-110 transition">${data.emoji}</div>
-            <div class="font-bold text-white text-md">${data.name}</div>
-            <div class="text-xs text-gray-400 mb-2 font-bold uppercase">${data.perk}</div>
-            <button onclick="handleShopAction('${id}', ${data.price}, ${owned})" class="w-full py-2 rounded-lg font-black text-white text-xs shadow-md ${btnCls}" ${(!owned && coins < data.price) ? 'disabled' : ''}>${btnStr}</button>
+        <div class="bg-white/5 backdrop-blur-sm p-4 rounded-2xl flex flex-col items-center border-2 ${owned ? 'border-indigo-500/50' : 'border-white/10'} hover:border-yellow-400/50 hover:bg-white/10 transition-all duration-200 group">
+            <div class="text-6xl mb-3 drop-shadow-lg transform group-hover:scale-110 transition-transform duration-200">${data.emoji}</div>
+            <div class="font-black text-white text-lg tracking-wide mb-1 text-center">${data.name}</div>
+            
+            <div class="text-xs text-yellow-300 bg-black/30 px-3 py-1 rounded-full mb-4 font-bold uppercase tracking-wider border border-white/5">
+                ${data.perk}
+            </div>
+
+            <button onclick="handleShopAction('${id}', ${data.price}, ${owned})" 
+                class="w-full py-3 rounded-xl font-bold text-sm transition-all ${btnCls}" 
+                ${(!owned && coins < data.price) ? 'disabled' : ''}>
+                ${btnStr}
+            </button>
         </div>`;
     };
-    let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3"><h3 class="col-span-full text-xl font-black text-yellow-400 border-b-2 border-yellow-400/20 pb-1 mb-2 mt-1">⚡ POWER UPS</h3>`;
+
+    let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pb-4">
+        <h3 class="col-span-full text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 border-b border-white/10 pb-2 mb-2">⚡ POWER UPS</h3>`;
     html += powerUpIDs.map(id => makeCard(id)).join('');
-    html += `<h3 class="col-span-full text-xl font-black text-purple-400 border-b-2 border-purple-400/20 pb-1 mb-2 mt-6">🎭 COOL STYLES</h3>`;
+    
+    html += `<h3 class="col-span-full text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-400 border-b border-white/10 pb-2 mb-2 mt-8">🎭 COOL STYLES</h3>`;
     html += vanityIDs.map(id => makeCard(id)).join('');
+    
     html += `</div>`;
     container.innerHTML = html;
 }
 
 function renderStickers(container) {
     if (!STICKER_DATA) { container.innerHTML = '<div class="text-center text-gray-500">Sticker data missing!</div>'; return; }
-    let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">`;
+    
+    let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pb-4">`;
     html += Object.entries(STICKER_DATA).map(([id, data]) => {
         const owned = ownedStickers.includes(id);
-        const btnClass = owned ? 'bg-gray-600 cursor-default' : (coins >= data.price ? 'bg-purple-500 hover:bg-purple-400' : 'bg-gray-700 cursor-not-allowed');
+        
+        let btnCls = owned ? 
+            "bg-gray-600/50 text-gray-300 cursor-default" : 
+            (coins >= data.price ? "bg-purple-500 hover:bg-purple-400 text-white shadow-lg active:scale-95" : "bg-gray-700 text-gray-500 cursor-not-allowed");
+            
         const btnText = owned ? 'OWNED' : `BUY ${data.price}💰`;
+        
         return `
-        <div class="bg-white/5 p-3 rounded-xl flex flex-col items-center border border-white/10">
-            <div class="text-5xl mb-2">${data.emoji}</div>
-            <div class="font-bold text-white">${data.name}</div>
-            <button class="w-full mt-2 rounded-lg py-2 font-bold text-xs text-white ${btnClass}" onclick="buySticker('${id}')" ${owned?'disabled':''}>${btnText}</button>
+        <div class="bg-white/5 backdrop-blur-sm p-4 rounded-2xl flex flex-col items-center border-2 border-white/10 hover:border-purple-400/50 hover:bg-white/10 transition-all duration-200">
+            <div class="text-6xl mb-3 drop-shadow-md transform hover:scale-110 transition-transform cursor-pointer">${data.emoji}</div>
+            <div class="font-bold text-white mb-3 text-center">${data.name}</div>
+            <button class="w-full mt-auto rounded-xl py-2 font-bold text-xs ${btnCls}" onclick="buySticker('${id}')" ${owned?'disabled':''}>${btnText}</button>
         </div>`;
     }).join('');
     html += `</div>`;
